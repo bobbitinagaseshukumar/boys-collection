@@ -24,7 +24,12 @@ app.use(helmet())
 // CORS configuration (Premium cross-origin allowances)
 app.use(
   cors({
-    origin: ['http://localhost:3000', 'http://localhost:5173'], // Vite standard client ports
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'https://boys-collection.vercel.app',
+      'https://boys-collection.vercel.app/'
+    ],
     credentials: true
   })
 )
