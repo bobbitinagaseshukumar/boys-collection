@@ -1,10 +1,12 @@
 import { useMemo } from 'react'
+import { useSelector } from 'react-redux'
 import AnimatedText from '@/components/ui/AnimatedText'
 import ProductCard from '@/components/product/ProductCard'
-import { products } from '@/data/products'
+import { selectAllProducts } from '@/redux/slices/productSlice'
 
 export default function TrendingProducts() {
-  const trending = useMemo(() => products.filter((p) => p.isTrending).slice(0, 8), [])
+  const products = useSelector(selectAllProducts)
+  const trending = useMemo(() => products.filter((p) => p.isTrending || p.trending).slice(0, 8), [products])
 
   return (
     <section className="section-padding relative">

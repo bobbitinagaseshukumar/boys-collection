@@ -1,11 +1,13 @@
 import { useMemo } from 'react'
+import { useSelector } from 'react-redux'
 import AnimatedText from '@/components/ui/AnimatedText'
 import ProductCard from '@/components/product/ProductCard'
 import MagneticButton from '@/components/ui/MagneticButton'
-import { products } from '@/data/products'
+import { selectAllProducts } from '@/redux/slices/productSlice'
 
 export default function NewArrivals() {
-  const newProducts = useMemo(() => products.filter((p) => p.isNewArrival).slice(0, 8), [])
+  const products = useSelector(selectAllProducts)
+  const newProducts = useMemo(() => products.filter((p) => p.isNewArrival || p.newArrival).slice(0, 8), [products])
 
   return (
     <section className="section-padding relative">

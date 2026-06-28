@@ -1,10 +1,10 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { useDispatch, useSelector } from 'react-redux'
-import { addToCart } from '@/redux/slices/cartSlice'
-import { toggleWishlist } from '@/redux/slices/wishlistSlice'
-import { products } from '@/data/products'
+import { addToCartDb } from '@/redux/slices/cartSlice'
+import { toggleWishlistDb } from '@/redux/slices/wishlistSlice'
+import { fetchProductBySlug, selectSelectedProduct, selectAllProducts } from '@/redux/slices/productSlice'
 import { formatPrice } from '@/utils/helpers'
 import MagneticButton from '@/components/ui/MagneticButton'
 
@@ -12,12 +12,20 @@ export default function ProductPage() {
   const { slug } = useParams()
   const dispatch = useDispatch()
   const wishlistItems = useSelector((s) => s.wishlist.items)
-  const product = useMemo(() => products.find((p) => p.slug === slug), [slug])
+  
+  const selectedProduct = useSelector(selectSelectedProduct)
+  const products = useSelector(selectAllProducts)
+  
+  const product = selectedProduct || products.find((p) => p.slug === slug)
 
   const [selectedSize, setSelectedSize] = useState('')
   const [selectedColor, setSelectedColor] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [addedToCart, setAddedToCart] = useState(false)
+
+  useEffect(() => {
+    dispatch(fetchProductBySlug(slug))
+  }, [slug, dispatch])
 
   useEffect(() => {
     if (product) {
@@ -42,13 +50,14 @@ export default function ProductPage() {
   const isWishlisted = wishlistItems.some((i) => i.id === product.id)
 
   const handleAddToCart = () => {
-    dispatch(addToCart({
+    dispatch(addToCartDb({
       id: product.id,
       title: product.title,
       price: product.price,
-      image: product.images?.[0],
+      image: product.images?.[0]?.url || product.images?.[0] || '/images/placeholder.jpg',
       size: selectedSize,
       color: product.colors?.[selectedColor]?.name || 'Default',
+      quantity,
     }))
     setAddedToCart(true)
     setTimeout(() => setAddedToCart(false), 2000)
@@ -215,7 +224,7 @@ export default function ProductPage() {
 
             {/* Wishlist */}
             <button
-              onClick={() => dispatch(toggleWishlist(product))}
+              onClick={() => dispatch(toggleWishlistDb(product))}
               className="flex items-center gap-2 text-white/40 hover:text-[#d4af37] text-sm transition-colors"
               data-cursor="hover"
             >

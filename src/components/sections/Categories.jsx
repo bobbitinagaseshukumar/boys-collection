@@ -1,8 +1,10 @@
 import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
+import { useSelector } from 'react-redux'
 import AnimatedText from '@/components/ui/AnimatedText'
-import { categories } from '@/data/categories'
+import { selectCategories } from '@/redux/slices/productSlice'
+import { categories as mockCategories } from '@/data/categories'
 
 const categoryIcons = {
   shirts: '👔',
@@ -25,6 +27,9 @@ const categoryGradients = [
 const enterDirections = ['left', 'right', 'bottom', 'left', 'right', 'bottom']
 
 export default function Categories() {
+  const dbCategories = useSelector(selectCategories)
+  const categoriesList = dbCategories.length > 0 ? dbCategories : mockCategories
+
   return (
     <section className="section-padding relative">
       <div className="container-premium">
@@ -38,8 +43,8 @@ export default function Categories() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {categories.map((cat, i) => (
-            <CategoryCard key={cat.id} category={cat} index={i} gradient={categoryGradients[i]} direction={enterDirections[i]} />
+          {categoriesList.map((cat, i) => (
+            <CategoryCard key={cat.id} category={cat} index={i} gradient={categoryGradients[i % categoryGradients.length]} direction={enterDirections[i % enterDirections.length]} />
           ))}
         </div>
       </div>

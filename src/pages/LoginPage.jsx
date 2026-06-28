@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { useDispatch } from 'react-redux'
-import { setUser } from '@/redux/slices/authSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { loginUser, selectAuthLoading, selectAuthError, clearError } from '@/redux/slices/authSlice'
 import GlassCard from '@/components/ui/GlassCard'
 import FloatingLabel from '@/components/ui/FloatingLabel'
 import MagneticButton from '@/components/ui/MagneticButton'
@@ -10,20 +10,23 @@ import MagneticButton from '@/components/ui/MagneticButton'
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  useEffect(() => { document.title = 'Login | STYLEX' }, [])
+  const loading = useSelector(selectAuthLoading)
+  const error = useSelector(selectAuthError)
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    document.title = 'Login | STYLEX'
+    dispatch(clearError())
+  }, [dispatch])
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
-    setTimeout(() => {
-      dispatch(setUser({ id: 1, name: 'Arjun Malhotra', email, avatar: null }))
-      setLoading(false)
+    const result = await dispatch(loginUser({ email, password }))
+    if (!result.error) {
       navigate('/')
-    }, 1500)
+    }
   }
 
   return (
@@ -73,6 +76,12 @@ export default function LoginPage() {
             </Link>
             <p className="text-white/30 text-sm mt-2">Welcome back to luxury</p>
           </div>
+
+          {error && (
+            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center animate-shake">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <FloatingLabel label="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
+import { useDispatch, useSelector } from 'react-redux'
+import { registerUser, selectAuthLoading, selectAuthError, clearError } from '@/redux/slices/authSlice'
 import GlassCard from '@/components/ui/GlassCard'
 import FloatingLabel from '@/components/ui/FloatingLabel'
 import MagneticButton from '@/components/ui/MagneticButton'
@@ -9,8 +11,15 @@ export default function RegisterPage() {
   const [step, setStep] = useState(0)
   const [form, setForm] = useState({ name: '', email: '', phone: '', city: '', password: '', confirm: '' })
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
-  useEffect(() => { document.title = 'Register | STYLEX' }, [])
+  const loading = useSelector(selectAuthLoading)
+  const error = useSelector(selectAuthError)
+
+  useEffect(() => {
+    document.title = 'Register | STYLEX'
+    dispatch(clearError())
+  }, [dispatch])
 
   const update = (field) => (e) => setForm({ ...form, [field]: e.target.value })
 
@@ -29,8 +38,19 @@ export default function RegisterPage() {
   const strengthLabels = ['Weak', 'Fair', 'Good', 'Strong']
   const strength = passwordStrength()
 
-  const handleSubmit = () => {
-    navigate('/otp')
+  const handleSubmit = async () => {
+    if (form.password !== form.confirm) return
+    const result = await dispatch(
+      registerUser({
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        password: form.password,
+      })
+    )
+    if (!result.error) {
+      navigate('/')
+    }
   }
 
   return (
@@ -48,6 +68,12 @@ export default function RegisterPage() {
             <Link to="/"><span className="text-3xl font-display font-extrabold tracking-[0.15em] text-gradient-gold">STYLEX</span></Link>
             <p className="text-white/30 text-sm mt-2">Create your account</p>
           </div>
+
+          {error && (
+            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center animate-shake">
+              {error}
+            </div>
+          )}
 
           {/* Progress */}
           <div className="flex items-center justify-center gap-2 mb-8">

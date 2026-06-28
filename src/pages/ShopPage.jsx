@@ -1,10 +1,11 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { motion } from 'motion/react'
+import { useSelector } from 'react-redux'
 import AnimatedText from '@/components/ui/AnimatedText'
 import ProductGrid from '@/components/product/ProductGrid'
-import { products } from '@/data/products'
-import { categories } from '@/data/categories'
+import { selectAllProducts, selectCategories } from '@/redux/slices/productSlice'
+import { categories as mockCategories } from '@/data/categories'
 
 const SORT_OPTIONS = [
   { value: 'featured', label: 'Featured' },
@@ -23,6 +24,10 @@ const PRICE_RANGES = [
 ]
 
 export default function ShopPage() {
+  const products = useSelector(selectAllProducts)
+  const dbCategories = useSelector(selectCategories)
+  const categoriesList = dbCategories.length > 0 ? dbCategories : mockCategories
+
   const [searchParams, setSearchParams] = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '')
@@ -62,7 +67,7 @@ export default function ShopPage() {
     }
 
     return result
-  }, [searchQuery, selectedCategory, selectedPrice, sortBy])
+  }, [products, searchQuery, selectedCategory, selectedPrice, sortBy])
 
   const clearFilters = () => {
     setSelectedCategory('')
@@ -119,7 +124,7 @@ export default function ShopPage() {
             >
               All
             </button>
-            {categories.map((cat) => (
+            {categoriesList.map((cat) => (
               <button
                 key={cat.slug}
                 onClick={() => { setSelectedCategory(cat.slug); setSearchParams({ category: cat.slug }) }}

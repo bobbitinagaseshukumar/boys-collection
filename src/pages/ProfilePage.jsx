@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useSelector } from 'react-redux'
+import { selectUser } from '@/redux/slices/authSlice'
 import GlassCard from '@/components/ui/GlassCard'
 import FloatingLabel from '@/components/ui/FloatingLabel'
 import MagneticButton from '@/components/ui/MagneticButton'
@@ -15,10 +17,20 @@ const mockOrders = [
 const statusColors = { Delivered: 'text-emerald-400 bg-emerald-400/10', Shipped: 'text-blue-400 bg-blue-400/10', Processing: 'text-yellow-400 bg-yellow-400/10', Cancelled: 'text-red-400 bg-red-400/10' }
 
 export default function ProfilePage() {
+  const user = useSelector(selectUser)
   const [activeTab, setActiveTab] = useState(0)
-  const [profile, setProfile] = useState({ name: 'Arjun Malhotra', email: 'arjun@stylex.in', phone: '+91 98765 43210' })
+  const [profile, setProfile] = useState({ name: '', email: '', phone: '' })
 
-  useEffect(() => { document.title = 'Profile | STYLEX' }, [])
+  useEffect(() => {
+    document.title = 'Profile | STYLEX'
+    if (user) {
+      setProfile({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+      })
+    }
+  }, [user])
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-24 pb-16 min-h-screen">
@@ -27,7 +39,7 @@ export default function ProfilePage() {
         <GlassCard className="mb-8">
           <div className="flex flex-col sm:flex-row items-center gap-5">
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#d4af37]/30 to-[#d4af37]/5 flex items-center justify-center text-[#d4af37] font-display font-bold text-2xl border border-[#d4af37]/20">
-              AM
+              {profile.name ? profile.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
             </div>
             <div className="text-center sm:text-left">
               <h1 className="text-white font-display font-bold text-xl">{profile.name}</h1>

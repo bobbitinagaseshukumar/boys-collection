@@ -4,11 +4,13 @@ import { motion } from 'motion/react'
 import { useSelector, useDispatch } from 'react-redux'
 import { selectCartCount } from '@/redux/slices/cartSlice'
 import { toggleMobileMenu, toggleSearch } from '@/redux/slices/uiSlice'
+import { selectIsAuthenticated } from '@/redux/slices/authSlice'
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false)
   const cartCount = useSelector(selectCartCount)
   const wishlistItems = useSelector((s) => s.wishlist.items)
+  const isAuthenticated = useSelector(selectIsAuthenticated)
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -112,15 +114,26 @@ export default function Header() {
             )}
           </Link>
 
-          {/* Login */}
-          <Link
-            to="/login"
-            className="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-medium text-white/70 hover:text-white border border-white/10 hover:border-white/20 rounded-lg transition-all duration-300 hover:bg-white/5"
-            data-cursor="hover"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            Login
-          </Link>
+          {/* Login / Account */}
+          {isAuthenticated ? (
+            <Link
+              to="/profile"
+              className="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#d4af37] border border-[#d4af37]/20 rounded-lg transition-all duration-300 hover:bg-[#d4af37]/5"
+              data-cursor="hover"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Account
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-medium text-white/70 hover:text-white border border-white/10 hover:border-white/20 rounded-lg transition-all duration-300 hover:bg-white/5"
+              data-cursor="hover"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Login
+            </Link>
+          )}
 
           {/* Mobile Menu Toggle */}
           <button

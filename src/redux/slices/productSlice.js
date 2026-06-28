@@ -1,8 +1,56 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { api } from '../../utils/api'
+
+// Async Thunks
+export const fetchProducts = createAsyncThunk(
+  'products/fetchAll',
+  async (filters = {}, { rejectWithValue }) => {
+    try {
+      const queryParams = new URLSearchParams()
+      if (filters.category) queryParams.append('category', filters.category)
+      if (filters.searchQuery) queryParams.append('search', filters.searchQuery)
+      if (filters.priceRange) {
+        queryParams.append('minPrice', filters.priceRange[0])
+        queryParams.append('maxPrice', filters.priceRange[1])
+      }
+      if (filters.sortBy) queryParams.append('sortBy', filters.sortBy)
+
+      const response = await api.get(`/api/products?${queryParams.toString()}`)
+      return response.products || response.data || response
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
+export const fetchProductBySlug = createAsyncThunk(
+  'products/fetchBySlug',
+  async (slug, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/api/products/${slug}`)
+      return response.product || response.data || response
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
+export const fetchCategories = createAsyncThunk(
+  'products/fetchCategories',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/api/categories')
+      return response.categories || response.data || response
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
 
 const initialState = {
   items: [],
   filteredItems: [],
+  categories: [],
   selectedProduct: null,
   filters: {
     category: '',
@@ -11,81 +59,16 @@ const initialState = {
     searchQuery: '',
   },
   isLoading: false,
-}
-
-const applyFilters = (items, filters) => {
-  let result = [...items]
-
-  // Category filter
-  if (filters.category) {
-    result = result.filter(
-      (item) =>
-        item.category?.toLowerCase() === filters.category.toLowerCase()
-    )
-  }
-
-  // Price range filter
-  const [minPrice, maxPrice] = filters.priceRange
-  result = result.filter(
-    (item) => item.price >= minPrice && item.price <= maxPrice
-  )
-
-  // Search query filter
-  if (filters.searchQuery) {
-    const query = filters.searchQuery.toLowerCase()
-    result = result.filter(
-      (item) =>
-        item.name?.toLowerCase().includes(query) ||
-        item.brand?.toLowerCase().includes(query) ||
-        item.category?.toLowerCase().includes(query) ||
-        item.description?.toLowerCase().includes(query)
-    )
-  }
-
-  // Sort
-  switch (filters.sortBy) {
-    case 'price-asc':
-      result.sort((a, b) => a.price - b.price)
-      break
-    case 'price-desc':
-      result.sort((a, b) => b.price - a.price)
-      break
-    case 'newest':
-      result.sort(
-        (a, b) => new Date(b.createdAt ?? 0) - new Date(a.createdAt ?? 0)
-      )
-      break
-    case 'name':
-      result.sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''))
-      break
-    case 'featured':
-    default:
-      result.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
-      break
-  }
-
-  return result
+  error: null,
 }
 
 const productSlice = createSlice({
   name: 'products',
   initialState,
   reducers: {
-    setProducts: (state, action) => {
-      state.items = action.payload
-      state.filteredItems = applyFilters(action.payload, state.filters)
-      state.isLoading = false
-    },
-
-    setSelectedProduct: (state, action) => {
-      state.selectedProduct = action.payload
-    },
-
     setFilters: (state, action) => {
       state.filters = { ...state.filters, ...action.payload }
-      state.filteredItems = applyFilters(state.items, state.filters)
     },
-
     resetFilters: (state) => {
       state.filters = {
         category: '',
@@ -93,33 +76,49 @@ const productSlice = createSlice({
         sortBy: 'featured',
         searchQuery: '',
       }
-      state.filteredItems = applyFilters(state.items, state.filters)
     },
-
-    filterProducts: (state) => {
-      state.filteredItems = applyFilters(state.items, state.filters)
-    },
-
     setSearchQuery: (state, action) => {
       state.filters.searchQuery = action.payload
-      state.filteredItems = applyFilters(state.items, state.filters)
     },
-
-    setProductsLoading: (state, action) => {
-      state.isLoading = action.payload
-    },
+  },
+  extraReducers: (builder) => {
+    builder
+      // Fetch all products
+      .addCase(fetchProducts.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(fetchProducts.fulfilled, (state, action) => {
+        state.isLoading = false
+        const products = Array.isArray(action.payload) ? action.payload : action.payload.products || []
+        state.items = products
+        state.filteredItems = products
+      })
+      .addCase(fetchProducts.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload
+      })
+      // Fetch single product by slug
+      .addCase(fetchProductBySlug.pending, (state) => {
+        state.isLoading = true
+        state.selectedProduct = null
+      })
+      .addCase(fetchProductBySlug.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.selectedProduct = action.payload
+      })
+      .addCase(fetchProductBySlug.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload
+      })
+      // Fetch categories
+      .addCase(fetchCategories.fulfilled, (state, action) => {
+        state.categories = Array.isArray(action.payload) ? action.payload : action.payload.categories || []
+      })
   },
 })
 
-export const {
-  setProducts,
-  setSelectedProduct,
-  setFilters,
-  resetFilters,
-  filterProducts,
-  setSearchQuery,
-  setProductsLoading,
-} = productSlice.actions
+export const { setFilters, resetFilters, setSearchQuery } = productSlice.actions
 
 // Selectors
 export const selectAllProducts = (state) => state.products.items
@@ -127,5 +126,6 @@ export const selectFilteredProducts = (state) => state.products.filteredItems
 export const selectSelectedProduct = (state) => state.products.selectedProduct
 export const selectProductFilters = (state) => state.products.filters
 export const selectProductsLoading = (state) => state.products.isLoading
+export const selectCategories = (state) => state.products.categories
 
 export default productSlice.reducer

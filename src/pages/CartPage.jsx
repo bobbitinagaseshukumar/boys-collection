@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { useSelector, useDispatch } from 'react-redux'
-import { selectCartItems, selectCartTotal, selectCartCount, updateQuantity, removeFromCart } from '@/redux/slices/cartSlice'
+import { selectCartItems, selectCartTotal, selectCartCount, updateQuantityDb, removeFromCartDb } from '@/redux/slices/cartSlice'
 import { formatPrice } from '@/utils/helpers'
 import MagneticButton from '@/components/ui/MagneticButton'
 import GlassCard from '@/components/ui/GlassCard'
@@ -53,19 +53,23 @@ export default function CartPage() {
               >
                 <GlassCard padding="p-4 md:p-5">
                   <div className="flex gap-4">
-                    {/* Image placeholder */}
-                    <div className="w-20 h-24 md:w-24 md:h-28 rounded-lg bg-gradient-to-br from-[#1a1a3e] to-[#0f0f18] flex items-center justify-center shrink-0">
-                      <span className="text-3xl opacity-30">👔</span>
-                    </div>
+                    {/* Image */}
+                    {item.image ? (
+                      <img src={item.image} alt={item.name || item.title} className="w-20 h-24 md:w-24 md:h-28 rounded-lg object-cover shrink-0 border border-white/5" />
+                    ) : (
+                      <div className="w-20 h-24 md:w-24 md:h-28 rounded-lg bg-gradient-to-br from-[#1a1a3e] to-[#0f0f18] flex items-center justify-center shrink-0">
+                        <span className="text-3xl opacity-30">👔</span>
+                      </div>
+                    )}
 
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="text-white font-display font-semibold text-sm md:text-base line-clamp-1">{item.title}</h3>
+                          <h3 className="text-white font-display font-semibold text-sm md:text-base line-clamp-1">{item.name || item.title}</h3>
                           <p className="text-white/30 text-xs mt-0.5">Size: {item.size} · Color: {item.color}</p>
                         </div>
                         <button
-                          onClick={() => dispatch(removeFromCart({ id: item.id, size: item.size, color: item.color }))}
+                          onClick={() => dispatch(removeFromCartDb({ id: item.id, size: item.size, color: item.color }))}
                           className="text-white/20 hover:text-red-400 transition-colors p-1 shrink-0"
                           data-cursor="hover"
                         >
@@ -76,14 +80,14 @@ export default function CartPage() {
                       <div className="flex items-end justify-between mt-3">
                         <div className="flex items-center gap-0 border border-white/10 rounded-lg overflow-hidden">
                           <button
-                            onClick={() => dispatch(updateQuantity({ id: item.id, size: item.size, color: item.color, quantity: Math.max(1, item.quantity - 1) }))}
+                            onClick={() => dispatch(updateQuantityDb({ id: item.id, size: item.size, color: item.color, quantity: Math.max(1, item.quantity - 1) }))}
                             className="w-8 h-8 bg-white/[0.04] text-white/60 hover:bg-white/10 flex items-center justify-center text-sm"
                           >−</button>
                           <motion.span key={item.quantity} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="w-8 h-8 flex items-center justify-center text-white text-sm font-medium">
                             {item.quantity}
                           </motion.span>
                           <button
-                            onClick={() => dispatch(updateQuantity({ id: item.id, size: item.size, color: item.color, quantity: item.quantity + 1 }))}
+                            onClick={() => dispatch(updateQuantityDb({ id: item.id, size: item.size, color: item.color, quantity: item.quantity + 1 }))}
                             className="w-8 h-8 bg-white/[0.04] text-white/60 hover:bg-white/10 flex items-center justify-center text-sm"
                           >+</button>
                         </div>
