@@ -27,6 +27,6 @@ dist-ssr
 .env
 .env.*
 
-# Server build & dependencies
-server/node_modules
-server/dist
+# Backend build & dependencies
+backend/node_modules
+backend/dist
