@@ -856,12 +856,12 @@ async function main() {
   console.log(`✓ Seeded ${productsData.length} products.`)
 
   // Seed Users
-  const adminPassword = await bcrypt.hash('Admin@123', 10)
+  const adminPassword = await bcrypt.hash('seshu@2409', 10)
   const customerPassword = await bcrypt.hash('Customer@123', 10)
 
   const admin = await prisma.user.create({
     data: {
-      email: 'admin@stylex.in',
+      email: 'nagaseshukumarbobbiti@gmail.com',
       password: adminPassword,
       name: 'STYLEX Admin',
       role: 'ADMIN'
