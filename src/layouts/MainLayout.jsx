@@ -5,7 +5,6 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import MobileMenu from '@/components/layout/MobileMenu'
 import Scene3D from '@/components/three/Scene3D'
-import CustomCursor from '@/animations/CustomCursor'
 import { useScrollProgress } from '@/hooks/useScrollProgress'
 import { useDevicePerformance } from '@/hooks/useDevicePerformance'
 import { useMousePosition } from '@/hooks/useMousePosition'
@@ -23,13 +22,11 @@ export default function MainLayout({ children }) {
     window.scrollTo(0, 0)
   }, [location.pathname])
 
-  // Auth pages don't show header/footer/3D bg
+// Auth pages don't show header/footer/3D bg
   const isAuthPage = ['/login', '/register', '/otp'].includes(location.pathname)
 
   return (
     <ReactLenis root options={{ lerp: 0.08, duration: 1.2, smoothWheel: true }}>
-      {/* Custom Cursor (desktop only) */}
-      {isDesktop && <CustomCursor />}
 
       {/* 3D Background (not on auth pages for performance) */}
       {enable3D && !isAuthPage && (

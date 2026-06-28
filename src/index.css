@@ -190,20 +190,7 @@ body {
   min-height: 100dvh;
 }
 
-/* Hide default cursor on desktop when custom cursor is active */
-@media (hover: hover) and (pointer: fine) {
-  body.custom-cursor-active {
-    cursor: none !important;
-  }
-  body.custom-cursor-active a,
-  body.custom-cursor-active button,
-  body.custom-cursor-active [role="button"],
-  body.custom-cursor-active input,
-  body.custom-cursor-active textarea,
-  body.custom-cursor-active select {
-    cursor: none !important;
-  }
-}
+/* Default browser cursor restored */
 
 ::selection {
   background: rgba(212, 175, 55, 0.3);
