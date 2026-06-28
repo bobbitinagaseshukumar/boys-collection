@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useSelector } from 'react-redux'
 import { selectUser } from '@/redux/slices/authSlice'
+import { api } from '@/utils/api'
 import GlassCard from '@/components/ui/GlassCard'
 import FloatingLabel from '@/components/ui/FloatingLabel'
 import MagneticButton from '@/components/ui/MagneticButton'
@@ -18,6 +19,8 @@ const statusColors = { Delivered: 'text-emerald-400 bg-emerald-400/10', Shipped:
 
 export default function ProfilePage() {
   const user = useSelector(selectUser)
+  const tabsList = user?.role === 'ADMIN' ? [...TABS, 'Admin Panel'] : TABS
+
   const [activeTab, setActiveTab] = useState(0)
   const [profile, setProfile] = useState({ name: '', email: '', phone: '' })
 
@@ -51,7 +54,7 @@ export default function ProfilePage() {
 
         {/* Tabs */}
         <div className="flex gap-1 mb-6 overflow-x-auto no-scrollbar">
-          {TABS.map((tab, i) => (
+          {tabsList.map((tab, i) => (
             <button
               key={tab}
               onClick={() => setActiveTab(i)}
@@ -134,9 +137,200 @@ export default function ProfilePage() {
                 </div>
               </GlassCard>
             )}
+
+            {activeTab === 4 && user?.role === 'ADMIN' && (
+              <AdminPanel />
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
     </motion.div>
+  )
+}
+
+function AdminPanel() {
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    price: '',
+    originalPrice: '',
+    discount: '0',
+    brand: 'STYLEX',
+    stock: '50',
+    categoryId: '1',
+    isFeatured: false,
+    isTrending: false,
+    isNewArrival: false,
+    images: '',
+    colors: '',
+    sizes: 'S, M, L, XL',
+  })
+  const [loading, setLoading] = useState(false)
+  const [msg, setMsg] = useState(null)
+  const [categories, setCategories] = useState([])
+
+  useEffect(() => {
+    api.get('/api/categories')
+      .then(res => {
+        const cats = res.categories || res.data || res
+        setCategories(cats)
+        if (cats.length > 0) {
+          setFormData(prev => ({ ...prev, categoryId: cats[0].id.toString() }))
+        }
+      })
+      .catch(err => console.error(err))
+  }, [])
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }))
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setMsg(null)
+
+    try {
+      const colorsFormatted = formData.colors
+        ? formData.colors.split(',').map(c => {
+            const parts = c.split(':')
+            const name = parts[0]?.trim() || 'Color'
+            const code = parts[1]?.trim() || parts[0]?.trim()
+            return { name, code }
+          })
+        : [{ name: 'Default', code: '#d4af37' }]
+
+      const sizesFormatted = formData.sizes
+        ? formData.sizes.split(',').map(s => s.trim())
+        : ['S', 'M', 'L']
+
+      const imagesFormatted = formData.images
+        ? formData.images.split(',').map(u => u.trim())
+        : ['https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=800&q=80']
+
+      const payload = {
+        ...formData,
+        price: parseFloat(formData.price),
+        originalPrice: parseFloat(formData.originalPrice),
+        discount: parseFloat(formData.discount),
+        stock: parseInt(formData.stock),
+        categoryId: parseInt(formData.categoryId),
+        images: imagesFormatted,
+        colors: colorsFormatted,
+        sizes: sizesFormatted
+      }
+
+      const res = await api.post('/api/products', payload)
+      if (res.success || res.data) {
+        setMsg({ type: 'success', text: 'Product created successfully!' })
+        setFormData({
+          title: '',
+          description: '',
+          price: '',
+          originalPrice: '',
+          discount: '0',
+          brand: 'STYLEX',
+          stock: '50',
+          categoryId: categories[0]?.id?.toString() || '1',
+          isFeatured: false,
+          isTrending: false,
+          isNewArrival: false,
+          images: '',
+          colors: '',
+          sizes: 'S, M, L, XL',
+        })
+      } else {
+        setMsg({ type: 'error', text: res.message || 'Failed to create product.' })
+      }
+    } catch (error) {
+      setMsg({ type: 'error', text: error.message || 'Error occurred while creating product.' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <GlassCard>
+      <h2 className="text-white font-display font-bold text-lg mb-6">Admin Panel — Upload New Product</h2>
+      {msg && (
+        <div className={`p-4 mb-6 rounded-xl border text-sm ${
+          msg.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-red-500/10 border-red-500/30 text-red-400'
+        }`}>
+          {msg.text}
+        </div>
+      )}
+      <form onSubmit={handleSubmit} className="space-y-5 max-w-xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FloatingLabel label="Product Title" name="title" value={formData.title} onChange={handleChange} required />
+          <FloatingLabel label="Brand Name" name="brand" value={formData.brand} onChange={handleChange} required />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FloatingLabel label="Selling Price (₹)" name="price" type="number" value={formData.price} onChange={handleChange} required />
+          <FloatingLabel label="Original Price (₹)" name="originalPrice" type="number" value={formData.originalPrice} onChange={handleChange} required />
+          <FloatingLabel label="Discount (%)" name="discount" type="number" value={formData.discount} onChange={handleChange} />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="relative">
+            <label className="text-[10px] uppercase text-white/40 tracking-wider block mb-1">Category</label>
+            <select
+              name="categoryId"
+              value={formData.categoryId}
+              onChange={handleChange}
+              className="w-full bg-[#0a0a0f] text-white border border-white/10 rounded-lg p-3 text-sm focus:border-[#d4af37] focus:outline-none"
+              required
+            >
+              {categories.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+          <FloatingLabel label="Stock Quantity" name="stock" type="number" value={formData.stock} onChange={handleChange} required />
+        </div>
+
+        <div>
+          <label className="text-[10px] uppercase text-white/40 tracking-wider block mb-1">Description</label>
+          <textarea
+            name="description"
+            rows="3"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder="Write a premium description..."
+            className="w-full bg-[#0a0a0f] text-white border border-white/10 rounded-lg p-3 text-sm focus:border-[#d4af37] focus:outline-none resize-none"
+            required
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FloatingLabel label="Sizes (e.g. S, M, L)" name="sizes" value={formData.sizes} onChange={handleChange} />
+          <FloatingLabel label="Colors (e.g. Gold:#d4af37, Black:#000)" name="colors" value={formData.colors} onChange={handleChange} />
+          <FloatingLabel label="Image URLs (comma separated)" name="images" value={formData.images} onChange={handleChange} />
+        </div>
+
+        <div className="flex flex-wrap gap-6 py-2 border-y border-white/5">
+          <label className="flex items-center gap-2 cursor-pointer text-sm text-white/70 hover:text-white">
+            <input type="checkbox" name="isFeatured" checked={formData.isFeatured} onChange={handleChange} className="accent-[#d4af37]" />
+            Featured Product
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer text-sm text-white/70 hover:text-white">
+            <input type="checkbox" name="isTrending" checked={formData.isTrending} onChange={handleChange} className="accent-[#d4af37]" />
+            Trending Product
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer text-sm text-white/70 hover:text-white">
+            <input type="checkbox" name="isNewArrival" checked={formData.isNewArrival} onChange={handleChange} className="accent-[#d4af37]" />
+            New Arrival
+          </label>
+        </div>
+
+        <MagneticButton variant="gold" size="lg" type="submit" disabled={loading} fullWidth>
+          {loading ? 'Uploading...' : 'Publish Product'}
+        </MagneticButton>
+      </form>
+    </GlassCard>
   )
 }
