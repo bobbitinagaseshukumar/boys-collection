@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { useSelector, useDispatch } from 'react-redux'
 import { selectCartCount } from '@/redux/slices/cartSlice'
@@ -7,6 +7,7 @@ import { toggleMobileMenu, toggleSearch } from '@/redux/slices/uiSlice'
 import { selectIsAuthenticated } from '@/redux/slices/authSlice'
 
 export default function Header() {
+  const location = useLocation()
   const [scrolled, setScrolled] = useState(false)
   const cartCount = useSelector(selectCartCount)
   const wishlistItems = useSelector((s) => s.wishlist.items)
@@ -48,31 +49,38 @@ export default function Header() {
 
         {/* Desktop Nav */}
         <nav className="hidden lg:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              data-cursor="hover"
-              className={({ isActive }) =>
-                `relative text-sm font-medium tracking-wide uppercase transition-colors duration-300 ${
+          {navLinks.map((link) => {
+            let isActive = false
+            if (link.to.includes('?')) {
+              isActive = location.pathname + location.search === link.to
+            } else if (link.to === '/shop') {
+              isActive = location.pathname.startsWith('/shop') && !location.search
+            } else if (link.to === '/') {
+              isActive = location.pathname === '/'
+            } else {
+              isActive = location.pathname === link.to
+            }
+
+            return (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                data-cursor="hover"
+                className={`relative text-sm font-medium tracking-wide uppercase transition-colors duration-300 ${
                   isActive ? 'text-[#d4af37]' : 'text-white/60 hover:text-white'
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  {link.label}
-                  {isActive && (
-                    <motion.div
-                      layoutId="nav-underline"
-                      className="absolute -bottom-1 left-0 right-0 h-[2px] bg-[#d4af37]"
-                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                    />
-                  )}
-                </>
-              )}
-            </NavLink>
-          ))}
+                }`}
+              >
+                {link.label}
+                {isActive && (
+                  <motion.div
+                    layoutId="nav-underline"
+                    className="absolute -bottom-1 left-0 right-0 h-[2px] bg-[#d4af37]"
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  />
+                )}
+              </NavLink>
+            )
+          })}
         </nav>
 
         {/* Right Actions */}
