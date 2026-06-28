@@ -1,0 +1,678 @@
+@import "tailwindcss";
+
+/* ========================================
+   STYLEX Design System — Tailwind CSS v4
+   ======================================== */
+
+@theme {
+  /* Typography */
+  --font-display: "Outfit", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  /* Premium Gold Palette */
+  --color-gold-50: oklch(0.96 0.04 85);
+  --color-gold-100: oklch(0.92 0.06 82);
+  --color-gold-200: oklch(0.85 0.10 78);
+  --color-gold-300: oklch(0.78 0.14 74);
+  --color-gold-400: oklch(0.72 0.16 72);
+  --color-gold-500: oklch(0.65 0.18 70);
+  --color-gold-600: oklch(0.55 0.16 68);
+  --color-gold-700: oklch(0.45 0.14 66);
+  --color-gold-800: oklch(0.35 0.10 64);
+  --color-gold-900: oklch(0.25 0.06 62);
+
+  /* Surface Colors (Dark Theme) */
+  --color-surface-900: #050508;
+  --color-surface-800: #0a0a0f;
+  --color-surface-700: #0f0f18;
+  --color-surface-600: #141422;
+  --color-surface-500: #1a1a2e;
+  --color-surface-400: #222240;
+  --color-surface-300: #2a2a50;
+  --color-surface-200: #3a3a60;
+  --color-surface-100: #5a5a80;
+
+  /* Glass Colors */
+  --color-glass-light: rgba(255, 255, 255, 0.06);
+  --color-glass-medium: rgba(255, 255, 255, 0.10);
+  --color-glass-heavy: rgba(255, 255, 255, 0.15);
+  --color-glass-border: rgba(255, 255, 255, 0.12);
+
+  /* Accent Colors */
+  --color-accent-blue: oklch(0.65 0.20 250);
+  --color-accent-purple: oklch(0.60 0.22 300);
+  --color-accent-rose: oklch(0.65 0.22 10);
+  --color-accent-emerald: oklch(0.70 0.18 160);
+
+  /* Status Colors */
+  --color-success: oklch(0.72 0.20 145);
+  --color-warning: oklch(0.80 0.18 80);
+  --color-error: oklch(0.65 0.25 25);
+  --color-info: oklch(0.70 0.15 240);
+
+  /* Breakpoints */
+  --breakpoint-xs: 320px;
+  --breakpoint-3xl: 1920px;
+  --breakpoint-4xl: 2560px;
+
+  /* Animations */
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-delayed: float 6s ease-in-out 2s infinite;
+  --animate-glow: glow-pulse 3s ease-in-out infinite;
+  --animate-shimmer: shimmer 2.5s linear infinite;
+  --animate-gradient: gradient-shift 8s ease infinite;
+  --animate-spin-slow: spin 20s linear infinite;
+  --animate-breathe: breathe 4s ease-in-out infinite;
+
+  /* Shadows */
+  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --shadow-premium: 0 20px 60px rgba(0, 0, 0, 0.5), 0 8px 20px rgba(0, 0, 0, 0.3);
+  --shadow-gold: 0 0 40px rgba(212, 175, 55, 0.15), 0 0 80px rgba(212, 175, 55, 0.05);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.2);
+  --shadow-card-hover: 0 12px 40px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-glow-gold: 0 0 20px rgba(212, 175, 55, 0.3), 0 0 40px rgba(212, 175, 55, 0.1);
+  --shadow-glow-blue: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.1);
+}
+
+/* ========================================
+   Keyframe Animations
+   ======================================== */
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  25% { transform: translateY(-15px) rotate(1deg); }
+  50% { transform: translateY(-8px) rotate(0deg); }
+  75% { transform: translateY(-20px) rotate(-1deg); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.2); }
+  50% { box-shadow: 0 0 40px rgba(212, 175, 55, 0.4), 0 0 80px rgba(212, 175, 55, 0.1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slide-down {
+  from { transform: translateY(-40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slide-left {
+  from { transform: translateX(60px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slide-right {
+  from { transform: translateX(-60px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes scale-in {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes rotate-in {
+  from { transform: rotate(-10deg) scale(0.9); opacity: 0; }
+  to { transform: rotate(0) scale(1); opacity: 1; }
+}
+
+@keyframes shine-sweep {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+@keyframes border-glow {
+  0%, 100% { border-color: rgba(212, 175, 55, 0.2); }
+  50% { border-color: rgba(212, 175, 55, 0.6); }
+}
+
+@keyframes loading-progress {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+@keyframes text-reveal {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+/* ========================================
+   Global Styles
+   ======================================== */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: auto; /* Lenis handles smooth scroll */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-surface-800);
+  color: #e8e8f0;
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Hide default cursor on desktop when custom cursor is active */
+@media (hover: hover) and (pointer: fine) {
+  body.custom-cursor-active {
+    cursor: none !important;
+  }
+  body.custom-cursor-active a,
+  body.custom-cursor-active button,
+  body.custom-cursor-active [role="button"],
+  body.custom-cursor-active input,
+  body.custom-cursor-active textarea,
+  body.custom-cursor-active select {
+    cursor: none !important;
+  }
+}
+
+::selection {
+  background: rgba(212, 175, 55, 0.3);
+  color: #ffffff;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface-800);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-gold-600);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-500);
+}
+
+/* ========================================
+   Safe Area Support
+   ======================================== */
+
+@supports (padding: env(safe-area-inset-top)) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* ========================================
+   Glassmorphism Utilities
+   ======================================== */
+
+.glass {
+  background: var(--color-glass-light);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--color-glass-border);
+}
+
+.glass-medium {
+  background: var(--color-glass-medium);
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
+  border: 1px solid var(--color-glass-border);
+}
+
+.glass-heavy {
+  background: var(--color-glass-heavy);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.glass-card {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: var(--shadow-glass);
+}
+
+/* ========================================
+   Premium Text Gradients
+   ======================================== */
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #d4af37, #f4d58d, #d4af37);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-silver {
+  background: linear-gradient(135deg, #c0c0c0, #f0f0f0, #c0c0c0);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-premium {
+  background: linear-gradient(135deg, #d4af37, #f0e68c, #daa520, #f4d58d, #d4af37);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 6s ease infinite;
+}
+
+/* ========================================
+   Shine Effect
+   ======================================== */
+
+.shine-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.shine-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.08),
+    transparent
+  );
+  transition: none;
+}
+
+.shine-effect:hover::after {
+  animation: shine-sweep 0.8s ease-out;
+}
+
+/* ========================================
+   Animated Gradient Backgrounds
+   ======================================== */
+
+.bg-animated-gradient {
+  background: linear-gradient(
+    -45deg,
+    var(--color-surface-800),
+    var(--color-surface-600),
+    #1a1a3e,
+    var(--color-surface-700)
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+.bg-premium-dark {
+  background: radial-gradient(
+    ellipse at 20% 50%,
+    rgba(212, 175, 55, 0.05) 0%,
+    transparent 50%
+  ),
+  radial-gradient(
+    ellipse at 80% 20%,
+    rgba(59, 130, 246, 0.04) 0%,
+    transparent 50%
+  ),
+  radial-gradient(
+    ellipse at 50% 80%,
+    rgba(168, 85, 247, 0.03) 0%,
+    transparent 50%
+  ),
+  var(--color-surface-800);
+}
+
+/* ========================================
+   Container
+   ======================================== */
+
+.container-premium {
+  width: 100%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(1rem, 4vw, 3rem);
+  padding-right: clamp(1rem, 4vw, 3rem);
+}
+
+/* ========================================
+   Premium Button Base
+   ======================================== */
+
+.btn-premium {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(0.875rem, 1vw, 1rem);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, #d4af37, #c5a028);
+  color: #0a0a0f;
+  border: none;
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+}
+
+.btn-gold:hover {
+  background: linear-gradient(135deg, #e0bf4a, #d4af37);
+  box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5);
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-gold-400);
+  border: 1px solid var(--color-gold-500);
+}
+
+.btn-outline:hover {
+  background: rgba(212, 175, 55, 0.1);
+  border-color: var(--color-gold-400);
+  box-shadow: var(--shadow-glow-gold);
+  transform: translateY(-2px);
+}
+
+.btn-glass {
+  background: var(--color-glass-light);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: #e8e8f0;
+  border: 1px solid var(--color-glass-border);
+}
+
+.btn-glass:hover {
+  background: var(--color-glass-medium);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-glass);
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   Input Styles
+   ======================================== */
+
+.input-premium {
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #e8e8f0;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  outline: none;
+  min-height: 44px;
+}
+
+.input-premium::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.input-premium:focus {
+  border-color: var(--color-gold-500);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1), var(--shadow-glow-gold);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ========================================
+   Product Card Styles
+   ======================================== */
+
+.product-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.product-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.product-card .product-image {
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.08);
+}
+
+/* ========================================
+   Responsive Typography
+   ======================================== */
+
+.text-hero {
+  font-size: clamp(2.5rem, 7vw, 7rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.text-section-title {
+  font-size: clamp(1.75rem, 4vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.text-section-subtitle {
+  font-size: clamp(0.95rem, 1.5vw, 1.25rem);
+  font-weight: 400;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.text-card-title {
+  font-size: clamp(1rem, 1.2vw, 1.25rem);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.text-card-body {
+  font-size: clamp(0.85rem, 0.9vw, 0.95rem);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.text-price {
+  font-size: clamp(1.1rem, 1.3vw, 1.5rem);
+  font-weight: 700;
+  font-family: var(--font-display);
+}
+
+/* ========================================
+   Loading Screen
+   ======================================== */
+
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-900);
+}
+
+.loading-progress-bar {
+  width: 200px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 2rem;
+}
+
+.loading-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-gold-500), var(--color-gold-300));
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* ========================================
+   Section Spacing
+   ======================================== */
+
+.section-padding {
+  padding-top: clamp(3rem, 8vh, 8rem);
+  padding-bottom: clamp(3rem, 8vh, 8rem);
+}
+
+.section-padding-sm {
+  padding-top: clamp(2rem, 5vh, 4rem);
+  padding-bottom: clamp(2rem, 5vh, 4rem);
+}
+
+/* ========================================
+   3D Canvas Overlay
+   ======================================== */
+
+.canvas-container {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.content-overlay {
+  position: relative;
+  z-index: 1;
+}
+
+/* ========================================
+   Mobile Menu
+   ======================================== */
+
+.mobile-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ========================================
+   Responsive Grid Utilities
+   ======================================== */
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.25rem;
+}
+
+@media (min-width: 480px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.75rem;
+  }
+}
+
+@media (min-width: 1440px) {
+  .product-grid {
+    gap: 2rem;
+  }
+}
+
+/* ========================================
+   Utility Classes
+   ======================================== */
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}

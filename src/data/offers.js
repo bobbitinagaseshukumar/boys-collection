@@ -1,0 +1,68 @@
+export const offers = [
+  {
+    id: 1,
+    title: "Summer Sale",
+    subtitle: "Beat the Heat in Style",
+    description:
+      "Refresh your wardrobe with up to 50% off on premium linen shirts, lightweight tees, and breathable chinos. Limited-time luxury at unbeatable prices.",
+    discount: 50,
+    code: "SUMMER50",
+    endDate: "2026-07-15T23:59:59",
+    bgGradient: "from-amber-500 to-orange-600",
+    textColor: "text-white",
+    category: "all",
+    minOrderValue: 2999,
+    maxDiscount: 3000,
+    featured: true,
+  },
+  {
+    id: 2,
+    title: "New Arrivals Drop",
+    subtitle: "First Access, First Impressions",
+    description:
+      "Get 30% off on all new arrivals this season. From Italian linen to Japanese selvedge denim — be the first to wear what's next.",
+    discount: 30,
+    code: "NEWDROP30",
+    endDate: "2026-08-01T23:59:59",
+    bgGradient: "from-violet-600 to-purple-800",
+    textColor: "text-white",
+    category: "new-arrivals",
+    minOrderValue: 1999,
+    maxDiscount: 2500,
+    featured: true,
+  },
+  {
+    id: 3,
+    title: "Premium Collection",
+    subtitle: "Invest in Timeless Elegance",
+    description:
+      "Flat 25% off on our curated Premium Collection — leather jackets, cashmere hoodies, and silk-blend dress shirts. Luxury, redefined.",
+    discount: 25,
+    code: "PREMIUM25",
+    endDate: "2026-09-30T23:59:59",
+    bgGradient: "from-yellow-600 to-amber-800",
+    textColor: "text-white",
+    category: "premium",
+    minOrderValue: 4999,
+    maxDiscount: 5000,
+    featured: false,
+  },
+  {
+    id: 4,
+    title: "Monsoon Wardrobe",
+    subtitle: "Rain-Ready, Style-Steady",
+    description:
+      "Up to 40% off on windbreakers, hoodies, and water-resistant outerwear. Stay dry and dapper this monsoon season with STYLEX.",
+    discount: 40,
+    code: "MONSOON40",
+    endDate: "2026-08-31T23:59:59",
+    bgGradient: "from-cyan-500 to-blue-700",
+    textColor: "text-white",
+    category: "outerwear",
+    minOrderValue: 2499,
+    maxDiscount: 4000,
+    featured: true,
+  },
+];
+
+export default offers;
