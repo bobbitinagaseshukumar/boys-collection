@@ -33,7 +33,7 @@ export default function ProfilePage() {
   }, [user])
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-24 pb-16 min-h-screen">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-4 pb-16 min-h-screen">
       <div className="container-premium max-w-4xl mx-auto">
         {/* Profile Header */}
         <GlassCard className="mb-8">

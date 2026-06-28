@@ -71,8 +71,6 @@ export default function ProductCard({ product, index = 0, animationDirection = '
       <Link
         to={`/product/${product.slug}`}
         className="block group"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
       >
         <div className="glass-card rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-[0_16px_48px_rgba(0,0,0,0.4),0_0_30px_rgba(212,175,55,0.08)] hover:-translate-y-2">
           {/* Image */}
@@ -150,7 +148,7 @@ export default function ProductCard({ product, index = 0, animationDirection = '
             {/* Add to Cart */}
             <button
               onClick={handleAddToCart}
-              className="w-full py-2.5 bg-white/[0.06] hover:bg-[#d4af37] text-white/70 hover:text-[#0a0a0f] text-xs font-display font-semibold uppercase tracking-wider rounded-lg border border-white/[0.08] hover:border-[#d4af37] transition-all duration-300 min-h-[44px]"
+              className="w-full py-2.5 bg-[#d4af37]/5 hover:bg-[#d4af37] text-[#d4af37] hover:text-[#0a0a0f] text-xs font-display font-semibold uppercase tracking-wider rounded-lg border border-[#d4af37]/35 hover:border-[#d4af37] transition-all duration-300 min-h-[44px] hover:shadow-[0_0_15px_rgba(212,175,55,0.25)]"
               data-cursor="hover"
             >
               Add to Cart

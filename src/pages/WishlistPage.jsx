@@ -20,7 +20,7 @@ export default function WishlistPage() {
 
   if (items.length === 0) {
     return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-24 pb-16 min-h-screen flex items-center justify-center">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-4 pb-16 min-h-screen flex items-center justify-center">
         <div className="text-center">
           <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', delay: 0.2 }} className="text-7xl mb-6 block">❤️</motion.span>
           <h2 className="text-white font-display text-2xl font-bold mb-2">Your wishlist is empty</h2>
@@ -32,7 +32,7 @@ export default function WishlistPage() {
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-24 pb-16 min-h-screen">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-4 pb-16 min-h-screen">
       <div className="container-premium">
         <h1 className="text-white font-display font-bold text-2xl md:text-3xl mb-8">My Wishlist ({items.length})</h1>
         <div className="product-grid">
