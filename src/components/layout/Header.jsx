@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { selectCartCount } from '@/redux/slices/cartSlice'
 import { toggleMobileMenu, toggleSearch } from '@/redux/slices/uiSlice'
 import { selectIsAuthenticated, selectUser } from '@/redux/slices/authSlice'
+import { useSettings } from '@/hooks/useSettings'
 
 export default function Header() {
   const location = useLocation()
@@ -13,6 +14,7 @@ export default function Header() {
   const wishlistItems = useSelector((s) => s.wishlist.items)
   const isAuthenticated = useSelector(selectIsAuthenticated)
   const user = useSelector(selectUser)
+  const { settings } = useSettings()
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -46,8 +48,8 @@ export default function Header() {
       <div className="container-premium flex items-center justify-between h-[70px] md:h-[70px]">
         {/* Logo */}
         <Link to="/" className="relative z-10" data-cursor="hover">
-          <span className="text-2xl md:text-3xl font-display font-extrabold tracking-[0.15em] text-gradient-gold">
-            STYLEX
+          <span className="text-xl md:text-2xl font-display font-extrabold tracking-wider text-gradient-gold">
+            {settings.shopName}
           </span>
         </Link>
 

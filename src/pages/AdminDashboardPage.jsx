@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useSelector, useDispatch } from 'react-redux'
 import { selectUser, logoutUser } from '@/redux/slices/authSlice'
 import { api } from '@/utils/api'
+import { useSettings } from '@/hooks/useSettings'
 import GlassCard from '@/components/ui/GlassCard'
 import FloatingLabel from '@/components/ui/FloatingLabel'
 import MagneticButton from '@/components/ui/MagneticButton'
@@ -879,18 +880,44 @@ function AdminAnalyticsPanel() {
 
 /* 10. SETTINGS SUBCOMPONENT */
 function AdminSettingsPanel() {
+  const { settings, refreshSettings, updateSettingsLocally } = useSettings()
   const [formData, setFormData] = useState({
-    shopName: 'Style Inverse @Jeshuvesre',
-    whatsapp: '+917993466185',
-    phone: '+917993466185',
-    address: '42, Marine Drive, South Mumbai, Maharashtra - 400020',
-    instagram: 'https://instagram.com/style_inverse',
-    facebook: 'https://facebook.com/style_inverse'
+    shopName: '',
+    whatsapp: '',
+    phone: '',
+    address: '',
+    instagram: '',
+    facebook: ''
   })
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if (settings) {
+      setFormData({
+        shopName: settings.shopName || '',
+        whatsapp: settings.whatsapp || '',
+        phone: settings.phone || '',
+        address: settings.address || '',
+        instagram: settings.instagram || '',
+        facebook: settings.facebook || ''
+      })
+    }
+  }, [settings])
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    alert('Settings saved successfully!')
+    setLoading(true)
+    try {
+      const res = await api.put('/api/settings', formData)
+      if (res.success || res.data) {
+        updateSettingsLocally(res.data || res)
+        alert('Configurations updated successfully!')
+      }
+    } catch (err) {
+      alert(err.message || 'Failed to save configurations.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -907,7 +934,7 @@ function AdminSettingsPanel() {
           <FloatingLabel label="Instagram URL" value={formData.instagram} onChange={(e) => setFormData({ ...formData, instagram: e.target.value })} />
           <FloatingLabel label="Facebook URL" value={formData.facebook} onChange={(e) => setFormData({ ...formData, facebook: e.target.value })} />
         </div>
-        <MagneticButton variant="gold" size="lg" type="submit" fullWidth>Save Configurations</MagneticButton>
+        <MagneticButton variant="gold" size="lg" type="submit" disabled={loading} fullWidth>{loading ? 'Saving...' : 'Save Configurations'}</MagneticButton>
       </form>
     </GlassCard>
   )

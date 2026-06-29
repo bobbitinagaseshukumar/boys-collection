@@ -17,6 +17,7 @@ import orderRoutes from './routes/order.routes.js'
 import reviewRoutes from './routes/review.routes.js'
 import whatsappRoutes from './routes/whatsapp.routes.js'
 import adminRoutes from './routes/admin.routes.js'
+import settingsRoutes from './routes/settings.routes.js'
 
 const app = express()
 
@@ -56,6 +57,7 @@ app.use('/api/orders', orderRoutes)
 app.use('/api/orders', whatsappRoutes)
 app.use('/api/reviews', reviewRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/settings', settingsRoutes)
 
 // Welcome / Health check route
 app.get('/api/health', (req, res) => {

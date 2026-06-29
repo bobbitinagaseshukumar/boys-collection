@@ -8,6 +8,7 @@ import { fetchProductBySlug, selectSelectedProduct, selectAllProducts } from '@/
 import { selectUser } from '@/redux/slices/authSlice'
 import { formatPrice } from '@/utils/helpers'
 import { api } from '@/utils/api'
+import { useSettings } from '@/hooks/useSettings'
 import MagneticButton from '@/components/ui/MagneticButton'
 
 export default function ProductPage() {
@@ -15,6 +16,7 @@ export default function ProductPage() {
   const dispatch = useDispatch()
   const wishlistItems = useSelector((s) => s.wishlist.items)
   const user = useSelector(selectUser)
+  const { settings } = useSettings()
   
   const selectedProduct = useSelector(selectSelectedProduct)
   const products = useSelector(selectAllProducts)
@@ -89,11 +91,12 @@ Color: ${selectedColorName}
 Link: ${productUrl}`
 
     const encodedMessage = encodeURIComponent(message)
-    window.open(`https://wa.me/917993466185?text=${encodedMessage}`, '_blank')
+    const cleanWhatsApp = settings.whatsapp.replace(/[^0-9]/g, '')
+    window.open(`https://wa.me/${cleanWhatsApp}?text=${encodedMessage}`, '_blank')
   }
 
   const handleCallNow = () => {
-    window.location.href = 'tel:+917993466185'
+    window.location.href = `tel:${settings.phone}`
   }
 
   const gradientBg = {
