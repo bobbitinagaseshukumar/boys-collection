@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { useDispatch, useSelector } from 'react-redux'
 import { addToCartDb } from '@/redux/slices/cartSlice'
@@ -14,6 +14,7 @@ import MagneticButton from '@/components/ui/MagneticButton'
 export default function ProductPage() {
   const { slug } = useParams()
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const wishlistItems = useSelector((s) => s.wishlist.items)
   const user = useSelector(selectUser)
   const { settings } = useSettings()
@@ -69,6 +70,10 @@ export default function ProductPage() {
   }
 
   const handleWhatsAppOrder = async () => {
+    if (!user) {
+      navigate(`/login?redirect=/product/${product.slug}`)
+      return
+    }
     const selectedColorName = product.colors?.[selectedColor]?.name || 'Default'
     const productUrl = window.location.href
 

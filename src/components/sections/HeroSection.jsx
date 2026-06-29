@@ -7,15 +7,31 @@ import HeroModel from '@/components/three/HeroModel'
 import LightingRig from '@/components/three/LightingRig'
 import { useMousePosition } from '@/hooks/useMousePosition'
 import { useIsMobile } from '@/hooks/useMediaQuery'
+import { useSettings } from '@/hooks/useSettings'
 
 export default function HeroSection() {
   const mouse = useMousePosition()
   const isMobile = useIsMobile()
+  const { settings } = useSettings()
+
+  const hero = settings.seoConfig?.hero || {
+    headline: 'REDEFINE YOUR STYLE',
+    subheadline: 'Discover the latest premium fashion statements curated for men and traditional wear.',
+    bgImage: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=1974',
+    buttonText: 'Explore Collections',
+    buttonLink: '/shop'
+  }
 
   return (
     <section className="relative min-h-screen min-h-[100dvh] flex items-center overflow-hidden">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0f] via-[#0f0f1a] to-[#0a0a0f]" />
+      {hero.bgImage && (
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-15 pointer-events-none"
+          style={{ backgroundImage: `url(${hero.bgImage})` }}
+        />
+      )}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(212,175,55,0.04)_0%,transparent_50%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(59,130,246,0.03)_0%,transparent_50%)]" />
 
@@ -28,27 +44,18 @@ export default function HeroSection() {
             transition={{ delay: 0.5, duration: 0.6 }}
             className="text-[#d4af37]/60 text-xs md:text-sm tracking-[0.3em] uppercase font-display mb-4"
           >
-            ✦ Luxury Men's Fashion ✦
+            ✦ {settings.shopName} ✦
           </motion.p>
 
           <AnimatedText
             animation="fadeUp"
             delay={0.7}
-            className="text-hero text-white mb-2"
+            className="text-hero text-white mb-6 leading-tight"
             tag="h1"
             triggerOnScroll={false}
           >
-            Redefine Your
+            {hero.headline}
           </AnimatedText>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.1, duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="text-hero text-gradient-premium mb-6"
-          >
-            Style
-          </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -56,7 +63,7 @@ export default function HeroSection() {
             transition={{ delay: 1.4, duration: 0.6 }}
             className="text-white/40 text-sm md:text-base max-w-md mx-auto lg:mx-0 mb-8 leading-relaxed font-body"
           >
-            Discover curated collections of premium men's fashion. Where timeless elegance meets contemporary design.
+            {hero.subheadline}
           </motion.p>
 
           <motion.div
@@ -65,8 +72,8 @@ export default function HeroSection() {
             transition={{ delay: 1.7, duration: 0.6 }}
             className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
           >
-            <MagneticButton variant="gold" size="lg" href="/shop">
-              Explore Collection
+            <MagneticButton variant="gold" size="lg" href={hero.buttonLink}>
+              {hero.buttonText}
             </MagneticButton>
             <MagneticButton variant="outline" size="lg" href="/shop?filter=new">
               New Arrivals

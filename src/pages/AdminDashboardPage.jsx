@@ -74,6 +74,7 @@ export default function AdminDashboardPage() {
 
   const menuItems = [
     { name: 'Dashboard', icon: '📊' },
+    { name: 'Website Builder', icon: '🎨' },
     { name: 'Products', icon: '🛍️' },
     { name: 'Categories', icon: '📁' },
     { name: 'Orders', icon: '📦' },
@@ -81,8 +82,11 @@ export default function AdminDashboardPage() {
     { name: 'Customers', icon: '👥' },
     { name: 'Reviews', icon: '⭐' },
     { name: 'Inventory', icon: '📥' },
+    { name: 'Marketing', icon: '📢' },
+    { name: 'Media Library', icon: '📂' },
     { name: 'Analytics', icon: '📈' },
-    { name: 'Settings', icon: '⚙️' }
+    { name: 'Settings', icon: '⚙️' },
+    { name: 'Logs & Backups', icon: '🛡️' }
   ]
 
   return (
@@ -153,6 +157,9 @@ export default function AdminDashboardPage() {
               {activeTab === 'Dashboard' && (
                 <AdminDashboardHome stats={stats} setActiveTab={setActiveTab} />
               )}
+              {activeTab === 'Website Builder' && (
+                <AdminWebsiteBuilderPanel />
+              )}
               {activeTab === 'Products' && (
                 <AdminProductsPanel products={products} setProducts={setProducts} categories={categories} />
               )}
@@ -174,11 +181,20 @@ export default function AdminDashboardPage() {
               {activeTab === 'Inventory' && (
                 <AdminInventoryPanel products={products} setProducts={setProducts} />
               )}
+              {activeTab === 'Marketing' && (
+                <AdminMarketingPanel />
+              )}
+              {activeTab === 'Media Library' && (
+                <AdminMediaLibraryPanel />
+              )}
               {activeTab === 'Analytics' && (
                 <AdminAnalyticsPanel />
               )}
               {activeTab === 'Settings' && (
                 <AdminSettingsPanel />
+              )}
+              {activeTab === 'Logs & Backups' && (
+                <AdminLogsAndBackupsPanel />
               )}
             </motion.div>
           </AnimatePresence>
@@ -937,5 +953,497 @@ function AdminSettingsPanel() {
         <MagneticButton variant="gold" size="lg" type="submit" disabled={loading} fullWidth>{loading ? 'Saving...' : 'Save Configurations'}</MagneticButton>
       </form>
     </GlassCard>
+  )
+}
+
+/* 11. WEBSITE BUILDER SUBCOMPONENT */
+function AdminWebsiteBuilderPanel() {
+  const { settings, updateSettingsLocally } = useSettings()
+  const [layout, setLayout] = useState([])
+  const [hero, setHero] = useState({ headline: '', subheadline: '', bgImage: '', buttonText: '', buttonLink: '' })
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (settings) {
+      setLayout(settings.homepageLayout || [
+        { id: 'hero', name: 'Hero Section', enabled: true, order: 0 },
+        { id: 'new-arrivals', name: 'New Arrivals', enabled: true, order: 1 },
+        { id: 'trending', name: 'Trending Products', enabled: true, order: 2 },
+        { id: 'categories', name: 'Categories', enabled: true, order: 3 },
+        { id: 'special-offers', name: 'Special Offers', enabled: true, order: 4 },
+        { id: 'testimonials', name: 'Testimonials', enabled: true, order: 5 },
+        { id: 'newsletter', name: 'Newsletter', enabled: true, order: 6 }
+      ])
+      setHero(settings.seoConfig?.hero || {
+        headline: 'REDEFINE YOUR STYLE',
+        subheadline: 'Discover the latest premium fashion statements curated for men and traditional wear.',
+        bgImage: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=1974',
+        buttonText: 'Explore Collections',
+        buttonLink: '/shop'
+      })
+    }
+  }, [settings])
+
+  const toggleSection = (id) => {
+    const updated = layout.map(s => s.id === id ? { ...s, enabled: !s.enabled } : s)
+    setLayout(updated)
+  }
+
+  const moveSection = (idx, direction) => {
+    if (idx + direction < 0 || idx + direction >= layout.length) return
+    const updated = [...layout]
+    const temp = updated[idx]
+    updated[idx] = updated[idx + direction]
+    updated[idx + direction] = temp
+    const ordered = updated.map((s, i) => ({ ...s, order: i }))
+    setLayout(ordered)
+  }
+
+  const handleSave = async () => {
+    setLoading(true)
+    try {
+      const seoConfigUpdated = { ...(settings.seoConfig || {}), hero }
+      const res = await api.put('/api/settings', {
+        ...settings,
+        homepageLayout: layout,
+        seoConfig: seoConfigUpdated
+      })
+      if (res.success || res.data) {
+        updateSettingsLocally(res.data || res)
+        alert('Website builder configurations saved successfully!')
+      }
+    } catch (err) {
+      alert(err.message || 'Failed to save website builder settings.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in">
+      {/* Homepage Sections Manager */}
+      <GlassCard>
+        <h3 className="text-white font-display font-bold text-lg mb-6">Homepage Layout Sections</h3>
+        <div className="space-y-4">
+          {layout.map((sect, idx) => (
+            <div key={sect.id} className="flex items-center justify-between p-3.5 bg-white/[0.03] border border-white/5 rounded-xl hover:bg-white/[0.05] transition-colors">
+              <div className="flex items-center gap-3">
+                <span className="text-white/30 text-sm">#{idx + 1}</span>
+                <span className="font-medium text-sm text-white/90">{sect.name}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => moveSection(idx, -1)}
+                  disabled={idx === 0}
+                  className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs text-white/70 hover:bg-white/15 disabled:opacity-30 disabled:pointer-events-none"
+                >
+                  ▲
+                </button>
+                <button
+                  onClick={() => moveSection(idx, 1)}
+                  disabled={idx === layout.length - 1}
+                  className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs text-white/70 hover:bg-white/15 disabled:opacity-30 disabled:pointer-events-none"
+                >
+                  ▼
+                </button>
+                <button
+                  onClick={() => toggleSection(sect.id)}
+                  className={`px-3 py-1 text-xs font-semibold rounded-lg border transition-colors ${
+                    sect.enabled
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                      : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                  }`}
+                >
+                  {sect.enabled ? 'Enabled' : 'Disabled'}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </GlassCard>
+
+      {/* Hero Visual Customizer */}
+      <GlassCard className="flex flex-col justify-between">
+        <div>
+          <h3 className="text-white font-display font-bold text-lg mb-6">Hero Section Customizer</h3>
+          <div className="space-y-4">
+            <FloatingLabel label="Headline text" value={hero.headline} onChange={(e) => setHero({ ...hero, headline: e.target.value })} />
+            <FloatingLabel label="Subheadline text" value={hero.subheadline} onChange={(e) => setHero({ ...hero, subheadline: e.target.value })} />
+            <FloatingLabel label="Background Image URL" value={hero.bgImage} onChange={(e) => setHero({ ...hero, bgImage: e.target.value })} />
+            <div className="grid grid-cols-2 gap-4">
+              <FloatingLabel label="Button Text" value={hero.buttonText} onChange={(e) => setHero({ ...hero, buttonText: e.target.value })} />
+              <FloatingLabel label="Button Redirect Link" value={hero.buttonLink} onChange={(e) => setHero({ ...hero, buttonLink: e.target.value })} />
+            </div>
+          </div>
+        </div>
+        <div className="mt-8">
+          <MagneticButton variant="gold" disabled={loading} onClick={handleSave} fullWidth>
+            {loading ? 'Saving Layout...' : 'Save Visual Builder Settings'}
+          </MagneticButton>
+        </div>
+      </GlassCard>
+    </div>
+  )
+}
+
+/* 12. MARKETING & OFFERS SUBCOMPONENT */
+function AdminMarketingPanel() {
+  const { settings, updateSettingsLocally } = useSettings()
+  const [coupons, setCoupons] = useState([])
+  const [popups, setPopups] = useState({ welcomePopup: { enabled: false, title: '', text: '', delay: 3 } })
+  const [announcements, setAnnouncements] = useState([])
+  const [newAnnounce, setNewAnnounce] = useState('')
+  const [newCoupon, setNewCoupon] = useState({ code: '', discount: 10, minOrder: 500, endDate: '' })
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (settings) {
+      setPopups(settings.popups || { welcomePopup: { enabled: false, title: '', text: '', delay: 3 } })
+      setAnnouncements(settings.announcements || [])
+    }
+    api.get('/api/coupons')
+      .then(res => setCoupons(res.data || res.coupons || res))
+      .catch(err => console.error(err))
+  }, [settings])
+
+  const handleSavePopups = async () => {
+    setLoading(true)
+    try {
+      const res = await api.put('/api/settings', { ...settings, popups })
+      if (res.success || res.data) {
+        updateSettingsLocally(res.data || res)
+        alert('Popup configurations updated!')
+      }
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleAddAnnouncement = async () => {
+    if (!newAnnounce.trim()) return
+    const updated = [...announcements, { text: newAnnounce, active: true }]
+    try {
+      const res = await api.put('/api/settings', { ...settings, announcements: updated })
+      if (res.success || res.data) {
+        updateSettingsLocally(res.data || res)
+        setAnnouncements(updated)
+        setNewAnnounce('')
+      }
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+
+  const handleDeleteAnnouncement = async (idx) => {
+    const updated = announcements.filter((_, i) => i !== idx)
+    try {
+      const res = await api.put('/api/settings', { ...settings, announcements: updated })
+      if (res.success || res.data) {
+        updateSettingsLocally(res.data || res)
+        setAnnouncements(updated)
+      }
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+
+  const handleCreateCoupon = async (e) => {
+    e.preventDefault()
+    try {
+      await api.post('/api/coupons', newCoupon)
+      alert('Coupon created successfully!')
+      setNewCoupon({ code: '', discount: 10, minOrder: 500, endDate: '' })
+      // Reload coupons list
+      const res = await api.get('/api/coupons')
+      setCoupons(res.data || res.coupons || res)
+    } catch (err) {
+      alert(err.message || 'Failed to create coupon.')
+    }
+  }
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
+      {/* Popups Customizer */}
+      <GlassCard>
+        <h3 className="text-white font-display font-bold text-lg mb-6">Welcome & Promo Popups</h3>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-3 bg-white/[0.02] border border-white/5 rounded-xl">
+            <span className="text-sm font-medium text-white/80">Enable Welcome Popup</span>
+            <input
+              type="checkbox"
+              checked={popups.welcomePopup?.enabled || false}
+              onChange={(e) => setPopups({
+                ...popups,
+                welcomePopup: { ...(popups.welcomePopup || {}), enabled: e.target.checked }
+              })}
+              className="w-4 h-4 accent-[#d4af37]"
+            />
+          </div>
+          <FloatingLabel
+            label="Popup Title"
+            value={popups.welcomePopup?.title || ''}
+            onChange={(e) => setPopups({
+              ...popups,
+              welcomePopup: { ...(popups.welcomePopup || {}), title: e.target.value }
+            })}
+          />
+          <FloatingLabel
+            label="Popup Description Text"
+            value={popups.welcomePopup?.text || ''}
+            onChange={(e) => setPopups({
+              ...popups,
+              welcomePopup: { ...(popups.welcomePopup || {}), text: e.target.value }
+            })}
+          />
+          <FloatingLabel
+            label="Timing Delay (seconds)"
+            value={popups.welcomePopup?.delay || 3}
+            onChange={(e) => setPopups({
+              ...popups,
+              welcomePopup: { ...(popups.welcomePopup || {}), delay: parseInt(e.target.value) || 3 }
+            })}
+          />
+          <MagneticButton variant="gold" size="sm" onClick={handleSavePopups} disabled={loading} fullWidth>
+            {loading ? 'Saving Popup...' : 'Save Popup Settings'}
+          </MagneticButton>
+        </div>
+      </GlassCard>
+
+      {/* Announcements Manager */}
+      <GlassCard>
+        <h3 className="text-white font-display font-bold text-lg mb-6">Scrolling Announcement Tickers</h3>
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Announce banner text..."
+              value={newAnnounce}
+              onChange={(e) => setNewAnnounce(e.target.value)}
+              className="flex-1 bg-white/[0.04] text-white border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d4af37]"
+            />
+            <button onClick={handleAddAnnouncement} className="px-3 bg-[#d4af37] text-black font-semibold rounded-lg text-sm hover:bg-[#e0bf4a]">
+              Add
+            </button>
+          </div>
+          <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+            {announcements.map((announce, idx) => (
+              <div key={idx} className="flex items-center justify-between p-3 bg-white/[0.02] border border-white/5 rounded-xl">
+                <span className="text-xs text-white/70 max-w-[200px] truncate">{announce.text}</span>
+                <button onClick={() => handleDeleteAnnouncement(idx)} className="text-xs text-rose-400 hover:text-rose-300">
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </GlassCard>
+
+      {/* Coupons Creator */}
+      <GlassCard>
+        <h3 className="text-white font-display font-bold text-lg mb-6">Create Discount Coupon</h3>
+        <form onSubmit={handleCreateCoupon} className="space-y-4">
+          <FloatingLabel label="Coupon Code" value={newCoupon.code} onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value.toUpperCase() })} required />
+          <div className="grid grid-cols-2 gap-4">
+            <FloatingLabel label="Discount %" value={newCoupon.discount} onChange={(e) => setNewCoupon({ ...newCoupon, discount: parseFloat(e.target.value) || 0 })} required />
+            <FloatingLabel label="Min Order Value (₹)" value={newCoupon.minOrder} onChange={(e) => setNewCoupon({ ...newCoupon, minOrder: parseFloat(e.target.value) || 0 })} required />
+          </div>
+          <FloatingLabel label="End Date" type="date" value={newCoupon.endDate} onChange={(e) => setNewCoupon({ ...newCoupon, endDate: e.target.value })} required />
+          <MagneticButton variant="gold" size="sm" type="submit" fullWidth>Create Coupon</MagneticButton>
+        </form>
+      </GlassCard>
+    </div>
+  )
+}
+
+/* 13. MEDIA CENTER SUBCOMPONENT */
+function AdminMediaLibraryPanel() {
+  const [search, setSearch] = useState('')
+  const [selectedFolder, setSelectedFolder] = useState('All')
+  const folders = ['All', 'Products', 'Categories', 'Banners', 'Marketing']
+  const mockMedia = [
+    { name: 'silk_saree_hero.jpg', url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=600', folder: 'Products', size: '240 KB' },
+    { name: 'designer_suit_banner.jpg', url: 'https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?q=80&w=600', folder: 'Banners', size: '420 KB' },
+    { name: 'diwali_discount_card.png', url: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=600', folder: 'Marketing', size: '180 KB' },
+    { name: 'category_men_shirts.jpg', url: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=600', folder: 'Categories', size: '120 KB' }
+  ]
+
+  const filtered = mockMedia.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase())
+    const matchesFolder = selectedFolder === 'All' || item.folder === selectedFolder
+    return matchesSearch && matchesFolder
+  })
+
+  return (
+    <GlassCard className="animate-fade-in">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+        <div>
+          <h3 className="text-white font-display font-bold text-lg">Central Media Library</h3>
+          <p className="text-white/40 text-xs mt-0.5">Manage and organize all uploaded catalog photos and campaign banner assets.</p>
+        </div>
+        <div className="flex gap-3 w-full md:w-auto">
+          <input
+            type="text"
+            placeholder="Search media..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="bg-white/[0.04] text-white border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d4af37] w-full md:w-48"
+          />
+          <button className="px-4 py-2 bg-white/[0.06] border border-white/10 rounded-lg text-sm hover:bg-white/10 whitespace-nowrap">
+            📤 Upload File
+          </button>
+        </div>
+      </div>
+
+      <div className="flex gap-2 overflow-x-auto pb-4 border-b border-white/5 mb-6">
+        {folders.map(f => (
+          <button
+            key={f}
+            onClick={() => setSelectedFolder(f)}
+            className={`px-4 py-1.5 rounded-lg text-xs font-semibold font-display border transition-colors whitespace-nowrap ${
+              selectedFolder === f
+                ? 'bg-[#d4af37]/15 border-[#d4af37]/30 text-[#d4af37]'
+                : 'bg-white/[0.02] border-white/5 text-white/50 hover:text-white'
+            }`}
+          >
+            📁 {f}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        {filtered.map((item, idx) => (
+          <div key={idx} className="group relative bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden hover:border-white/20 transition-all duration-300">
+            <img src={item.url} alt={item.name} className="w-full h-32 object-cover" />
+            <div className="p-3">
+              <p className="text-xs text-white/80 font-medium truncate mb-0.5">{item.name}</p>
+              <div className="flex justify-between items-center text-[10px] text-white/30">
+                <span>{item.folder}</span>
+                <span>{item.size}</span>
+              </div>
+            </div>
+            <div className="absolute inset-0 bg-[#0a0a0f]/80 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button onClick={() => navigator.clipboard.writeText(item.url).then(() => alert('Image URL copied to clipboard!'))} className="p-1.5 bg-white/10 hover:bg-white/20 text-xs rounded border border-white/10">
+                🔗 Copy URL
+              </button>
+              <button className="p-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs rounded border border-rose-500/30">
+                🗑️ Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </GlassCard>
+  )
+}
+
+/* 14. SECURITY LOGS & BACKUPS SUBCOMPONENT */
+function AdminLogsAndBackupsPanel() {
+  const [loading, setLoading] = useState(false)
+
+  const mockLogs = [
+    { user: 'nagaseshukumarbobbiti@gmail.com', action: 'Update settings metadata logo text', time: 'Just now', ip: '103.45.67.92' },
+    { user: 'nagaseshukumarbobbiti@gmail.com', action: 'Change homepage Hero title', time: '10 mins ago', ip: '103.45.67.92' },
+    { user: 'nagaseshukumarbobbiti@gmail.com', action: 'Verify order #1002 payment status', time: '1 hour ago', ip: '103.45.67.92' },
+    { user: 'nagaseshukumarbobbiti@gmail.com', action: 'Delete old product code #9203', time: 'Yesterday', ip: '103.45.67.92' }
+  ]
+
+  const handleExportBackup = async () => {
+    try {
+      const res = await api.get('/api/admin/backup/export')
+      const backupData = res.data || res
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `style_inverse_backup_${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+    } catch (err) {
+      alert('Failed to export backup: ' + err.message)
+    }
+  }
+
+  const handleImportBackup = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = async (evt) => {
+      try {
+        const backupJson = JSON.parse(evt.target.result)
+        const payload = backupJson.data || backupJson
+        setLoading(true)
+        const res = await api.post('/api/admin/backup/import', payload)
+        if (res.success) {
+          alert('Database restored successfully! Reloading to apply changes.')
+          window.location.reload()
+        }
+      } catch (err) {
+        alert('Invalid backup payload or restore failed: ' + err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    reader.readAsText(file)
+  }
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
+      {/* Activity Logs */}
+      <GlassCard className="lg:col-span-2">
+        <h3 className="text-white font-display font-bold text-lg mb-6">Admin Activity Logs</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm text-white/70">
+            <thead>
+              <tr className="border-b border-white/5 text-white/40 text-xs font-semibold uppercase tracking-wider">
+                <th className="pb-3">Admin</th>
+                <th className="pb-3">Action performed</th>
+                <th className="pb-3">Timestamp</th>
+                <th className="pb-3">IP Address</th>
+              </tr>
+            </thead>
+            <tbody>
+              {mockLogs.map((log, idx) => (
+                <tr key={idx} className="border-b border-white/[0.03] hover:bg-white/[0.01]">
+                  <td className="py-3 font-medium text-white/90 text-xs">{log.user}</td>
+                  <td className="py-3 text-xs">{log.action}</td>
+                  <td className="py-3 text-xs text-white/40">{log.time}</td>
+                  <td className="py-3 text-xs text-mono text-white/30">{log.ip}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </GlassCard>
+
+      {/* Backup controls */}
+      <GlassCard>
+        <h3 className="text-white font-display font-bold text-lg mb-6">Database Backup Suite</h3>
+        <div className="space-y-6">
+          <p className="text-xs text-white/40 leading-relaxed">
+            Create full JSON snapshot backups of the catalog database (Products, Settings, Reviews, Categories, and Orders). Restore from any backup file instantly.
+          </p>
+          <div className="space-y-4">
+            <MagneticButton variant="gold" onClick={handleExportBackup} fullWidth>
+              📥 Download DB Backup
+            </MagneticButton>
+            <div className="relative">
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleImportBackup}
+                disabled={loading}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:pointer-events-none"
+              />
+              <button className="w-full px-6 py-3 text-sm font-semibold uppercase bg-white/5 border border-white/10 rounded hover:bg-white/10 text-white/90" disabled={loading}>
+                {loading ? 'Restoring Database...' : '📤 Upload & Restore Backup'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </GlassCard>
+    </div>
   )
 }

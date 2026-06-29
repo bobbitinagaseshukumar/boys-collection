@@ -161,3 +161,104 @@ export const getCustomersAdmin = async (req, res, next) => {
     next(error)
   }
 }
+
+// @desc    Export database JSON backup
+// @route   GET /api/admin/backup/export
+// @access  Private/Admin
+export const exportBackup = async (req, res, next) => {
+  try {
+    const products = await prisma.product.findMany()
+    const categories = await prisma.category.findMany()
+    const orders = await prisma.order.findMany()
+    const whatsappOrders = await prisma.whatsAppOrder.findMany()
+    const reviews = await prisma.review.findMany()
+    const settings = await prisma.settings.findFirst()
+
+    res.status(200).json({
+      success: true,
+      data: {
+        products,
+        categories,
+        orders,
+        whatsappOrders,
+        reviews,
+        settings
+      }
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+// @desc    Import database JSON backup
+// @route   POST /api/admin/backup/import
+// @access  Private/Admin
+export const importBackup = async (req, res, next) => {
+  try {
+    const { products, categories, orders, whatsappOrders, reviews, settings } = req.body
+
+    // Perform database restore inside a transaction
+    await prisma.$transaction(async (tx) => {
+      // Clear tables
+      if (reviews) await tx.review.deleteMany()
+      if (whatsappOrders) await tx.whatsAppOrder.deleteMany()
+      if (orders) await tx.order.deleteMany()
+      if (products) await tx.product.deleteMany()
+      if (categories) await tx.category.deleteMany()
+      if (settings) await tx.settings.deleteMany()
+
+      // Re-populate categories
+      if (categories && categories.length > 0) {
+        await tx.category.createMany({ data: categories.map(c => {
+          const { id, ...rest } = c
+          return rest
+        }) })
+      }
+
+      // Re-populate products
+      if (products && products.length > 0) {
+        await tx.product.createMany({ data: products.map(p => {
+          const { id, ...rest } = p
+          return rest
+        }) })
+      }
+
+      // Re-populate settings
+      if (settings) {
+        const { id, ...rest } = settings
+        await tx.settings.create({ data: { id: 1, ...rest } })
+      }
+      
+      // Re-populate reviews
+      if (reviews && reviews.length > 0) {
+        await tx.review.createMany({ data: reviews.map(r => {
+          const { id, ...rest } = r
+          return rest
+        }) })
+      }
+
+      // Re-populate whatsappOrders
+      if (whatsappOrders && whatsappOrders.length > 0) {
+        await tx.whatsAppOrder.createMany({ data: whatsappOrders.map(w => {
+          const { id, ...rest } = w
+          return rest
+        }) })
+      }
+
+      // Re-populate orders
+      if (orders && orders.length > 0) {
+        await tx.order.createMany({ data: orders.map(o => {
+          const { id, ...rest } = o
+          return rest
+        }) })
+      }
+    })
+
+    res.status(200).json({
+      success: true,
+      message: 'Database backup imported and restored successfully!'
+    })
+  } catch (error) {
+    next(error)
+  }
+}

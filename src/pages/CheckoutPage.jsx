@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { selectCartTotal, selectCartCount, selectCartItems } from '@/redux/slices/cartSlice'
+import { selectIsAuthenticated } from '@/redux/slices/authSlice'
 import { formatPrice } from '@/utils/helpers'
 import { api } from '@/utils/api'
 import GlassCard from '@/components/ui/GlassCard'
@@ -25,6 +27,15 @@ const loadRazorpayScript = () => {
 }
 
 export default function CheckoutPage() {
+  const navigate = useNavigate()
+  const isAuthenticated = useSelector(selectIsAuthenticated)
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/checkout')
+    }
+  }, [isAuthenticated, navigate])
+
   const [step, setStep] = useState(0)
   const total = useSelector(selectCartTotal)
   const count = useSelector(selectCartCount)
