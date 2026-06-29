@@ -17,7 +17,7 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-4 pb-16 min-h-screen flex items-center justify-center">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="page-container flex items-center justify-center">
         <div className="text-center">
           <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', delay: 0.2 }} className="text-7xl mb-6 block">🛒</motion.span>
           <h2 className="text-white font-display text-2xl font-bold mb-2">Your cart is empty</h2>
@@ -31,7 +31,7 @@ export default function CartPage() {
   const shipping = total >= 2000 ? 0 : 199
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="pt-4 pb-16 min-h-screen">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="page-container">
       <div className="container-premium">
         <div className="flex items-center gap-2 text-xs text-white/30 mb-6">
           <Link to="/" className="hover:text-white/60 transition-colors">Home</Link>

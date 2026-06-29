@@ -20,7 +20,7 @@ export default function CheckoutPage() {
   const update = (field) => (e) => setForm({ ...form, [field]: e.target.value })
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-4 pb-16 min-h-screen">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="page-container">
       <div className="container-premium max-w-4xl mx-auto">
         <h1 className="text-white font-display font-bold text-2xl md:text-3xl mb-8 text-center">Checkout</h1>
 

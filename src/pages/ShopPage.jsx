@@ -78,7 +78,7 @@ export default function ShopPage() {
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="pt-4 pb-12 min-h-screen">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="page-container">
       <div className="container-premium">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-white/30 mb-6">

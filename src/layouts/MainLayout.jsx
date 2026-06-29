@@ -41,7 +41,7 @@ export default function MainLayout({ children }) {
       <div className="content-overlay">
         {!isAuthPage && <Header />}
         <MobileMenu />
-        <main className="min-h-screen" style={{ paddingTop: isAuthPage ? '0px' : '75px' }}>
+        <main className="min-h-screen">
           {children}
         </main>
         {!isAuthPage && <Footer />}

@@ -37,7 +37,7 @@ export default function ProductPage() {
 
   if (!product) {
     return (
-      <div className="pt-4 min-h-screen flex items-center justify-center">
+      <div className="page-container flex items-center justify-center">
         <div className="text-center">
           <span className="text-6xl mb-4 block">😕</span>
           <h2 className="text-white text-xl font-display mb-2">Product Not Found</h2>
@@ -75,7 +75,7 @@ export default function ProductPage() {
   const categoryEmoji = { shirts: '👔', pants: '👖', jeans: '👖', tshirts: '👕', hoodies: '🧥', jackets: '🧥' }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="pt-4 pb-16 min-h-screen">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="page-container">
       <div className="container-premium">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-white/30 mb-8">
