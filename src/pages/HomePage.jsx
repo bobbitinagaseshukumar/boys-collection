@@ -26,7 +26,7 @@ export default function HomePage() {
     'newsletter': <Newsletter key="newsletter" />
   }
 
-  const sortedLayout = [...(settings.homepageLayout || [
+  const sortedLayout = [...((settings.homepageLayout && settings.homepageLayout.length > 0) ? settings.homepageLayout : [
     { id: 'hero', enabled: true, order: 0 },
     { id: 'new-arrivals', enabled: true, order: 1 },
     { id: 'trending', enabled: true, order: 2 },

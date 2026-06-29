@@ -965,7 +965,7 @@ function AdminWebsiteBuilderPanel() {
 
   useEffect(() => {
     if (settings) {
-      setLayout(settings.homepageLayout || [
+      setLayout((settings.homepageLayout && settings.homepageLayout.length > 0) ? settings.homepageLayout : [
         { id: 'hero', name: 'Hero Section', enabled: true, order: 0 },
         { id: 'new-arrivals', name: 'New Arrivals', enabled: true, order: 1 },
         { id: 'trending', name: 'Trending Products', enabled: true, order: 2 },
