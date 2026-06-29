@@ -96,7 +96,7 @@ export default function Footer() {
                   placeholder="Your email"
                   className="flex-1 bg-white/[0.04] border border-white/10 border-r-0 rounded-l-lg px-3 py-2.5 text-sm text-white/80 outline-none focus:border-[#d4af37]/40 transition-colors min-h-[44px]"
                 />
-                <button className="px-4 bg-[#d4af37] text-[#0a0a0f] font-semibold text-sm rounded-r-lg hover:bg-[#e0bf4a] transition-colors min-h-[44px]" data-cursor="hover">
+                <button className="w-11 h-11 flex-shrink-0 flex items-center justify-center bg-[#d4af37] text-[#0a0a0f] text-lg rounded-r-lg hover:bg-[#e0bf4a] transition-colors" data-cursor="hover">
                   →
                 </button>
               </div>

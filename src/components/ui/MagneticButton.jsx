@@ -42,7 +42,7 @@ export default function MagneticButton({
     glass: 'bg-white/5 backdrop-blur-xl text-[#e8e8f0] border border-white/10 hover:bg-white/10 hover:border-white/20',
   }
 
-  const baseClasses = `relative inline-flex items-center justify-center gap-2 font-display font-semibold uppercase tracking-wider rounded overflow-hidden transition-all duration-400 ${sizes[size]} ${variants[variant]} ${fullWidth ? 'w-full' : ''} ${disabled ? 'opacity-50 pointer-events-none' : ''} ${className}`
+  const baseClasses = `relative inline-flex items-center justify-center gap-2 font-display font-semibold uppercase tracking-wider rounded overflow-hidden transition-all duration-400 flex-shrink-0 whitespace-nowrap ${sizes[size]} ${variants[variant]} ${fullWidth ? 'w-full' : ''} ${disabled ? 'opacity-50 pointer-events-none' : ''} ${className}`
 
   const content = (
     <>

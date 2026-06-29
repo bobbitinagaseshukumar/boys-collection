@@ -24,7 +24,7 @@ export default function AnimatedText({
     return () => observer.disconnect()
   }, [triggerOnScroll])
 
-  const text = typeof children === 'string' ? children : ''
+  const text = typeof children === 'string' ? children.trim().replace(/\s+/g, ' ') : ''
   const Tag = tag
 
   if (animation === 'reveal' && text) {
@@ -51,7 +51,7 @@ export default function AnimatedText({
     return (
       <Tag ref={ref} className={`font-display ${className}`}>
         {words.map((word, i) => (
-          <span key={i} className="inline-block overflow-hidden mr-[0.3em]">
+          <span key={i} className="inline-block overflow-hidden mr-2">
             <motion.span
               className="inline-block"
               initial={{ y: '100%', opacity: 0 }}
