@@ -4,7 +4,7 @@ import { motion } from 'motion/react'
 import { useSelector, useDispatch } from 'react-redux'
 import { selectCartCount } from '@/redux/slices/cartSlice'
 import { toggleMobileMenu, toggleSearch } from '@/redux/slices/uiSlice'
-import { selectIsAuthenticated } from '@/redux/slices/authSlice'
+import { selectIsAuthenticated, selectUser } from '@/redux/slices/authSlice'
 
 export default function Header() {
   const location = useLocation()
@@ -12,11 +12,12 @@ export default function Header() {
   const cartCount = useSelector(selectCartCount)
   const wishlistItems = useSelector((s) => s.wishlist.items)
   const isAuthenticated = useSelector(selectIsAuthenticated)
+  const user = useSelector(selectUser)
   const dispatch = useDispatch()
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50)
-    window.addEventListener('scroll', onScroll, { passive: true })
+    const onScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
@@ -24,8 +25,9 @@ export default function Header() {
     { to: '/', label: 'Home' },
     { to: '/shop', label: 'Shop' },
     { to: '/shop?category=shirts', label: 'Categories' },
+    user?.role === 'ADMIN' ? { to: '/admin', label: 'Admin' } : null,
     { to: '/about', label: 'About' },
-  ]
+  ].filter(Boolean)
 
   const isHomePage = location.pathname === '/'
 

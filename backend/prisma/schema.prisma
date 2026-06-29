@@ -222,3 +222,14 @@ model Coupon {
   endDate     DateTime
   active      Boolean  @default(true)
 }
+
+model WhatsAppOrder {
+  id            Int      @id @default(autoincrement())
+  customerName  String
+  phoneNumber   String
+  productName   String
+  productPrice  Float
+  selectedColor String?
+  status        String   @default("New") // "New", "Contacted", "Completed"
+  createdAt     DateTime @default(now())
+}

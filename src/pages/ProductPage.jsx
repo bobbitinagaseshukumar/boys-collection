@@ -5,13 +5,16 @@ import { useDispatch, useSelector } from 'react-redux'
 import { addToCartDb } from '@/redux/slices/cartSlice'
 import { toggleWishlistDb } from '@/redux/slices/wishlistSlice'
 import { fetchProductBySlug, selectSelectedProduct, selectAllProducts } from '@/redux/slices/productSlice'
+import { selectUser } from '@/redux/slices/authSlice'
 import { formatPrice } from '@/utils/helpers'
+import { api } from '@/utils/api'
 import MagneticButton from '@/components/ui/MagneticButton'
 
 export default function ProductPage() {
   const { slug } = useParams()
   const dispatch = useDispatch()
   const wishlistItems = useSelector((s) => s.wishlist.items)
+  const user = useSelector(selectUser)
   
   const selectedProduct = useSelector(selectSelectedProduct)
   const products = useSelector(selectAllProducts)
@@ -61,6 +64,36 @@ export default function ProductPage() {
     }))
     setAddedToCart(true)
     setTimeout(() => setAddedToCart(false), 2000)
+  }
+
+  const handleWhatsAppOrder = async () => {
+    const selectedColorName = product.colors?.[selectedColor]?.name || 'Default'
+    const productUrl = window.location.href
+
+    try {
+      await api.post('/api/orders/whatsapp', {
+        productName: product.title,
+        productPrice: product.price,
+        selectedColor: selectedColorName,
+        customerName: user?.name || 'Guest',
+        phoneNumber: user?.phone || 'Guest Phone'
+      })
+    } catch (err) {
+      console.error('Failed to log WhatsApp click:', err)
+    }
+
+    const message = `Hello, I want to order:
+Product: ${product.title}
+Price: ₹${product.price}
+Color: ${selectedColorName}
+Link: ${productUrl}`
+
+    const encodedMessage = encodeURIComponent(message)
+    window.open(`https://wa.me/917993466185?text=${encodedMessage}`, '_blank')
+  }
+
+  const handleCallNow = () => {
+    window.location.href = 'tel:+917993466185'
   }
 
   const gradientBg = {
@@ -207,19 +240,38 @@ export default function ProductPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-6">
-              <MagneticButton
-                variant="gold"
-                size="lg"
-                fullWidth
-                onClick={handleAddToCart}
-                icon={addedToCart ? '✓' : undefined}
-              >
-                {addedToCart ? 'Added!' : 'Add to Cart'}
-              </MagneticButton>
-              <MagneticButton variant="outline" size="lg" fullWidth href="/checkout">
-                Buy Now
-              </MagneticButton>
+            <div className="space-y-3 mb-6">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <MagneticButton
+                  variant="gold"
+                  size="lg"
+                  fullWidth
+                  onClick={handleAddToCart}
+                  icon={addedToCart ? '✓' : undefined}
+                >
+                  {addedToCart ? 'Added!' : 'Add to Cart'}
+                </MagneticButton>
+                <MagneticButton variant="outline" size="lg" fullWidth href="/checkout">
+                  Buy Now (Online)
+                </MagneticButton>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={handleWhatsAppOrder}
+                  className="flex-1 px-6 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-display font-bold text-sm tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] min-h-[44px]"
+                  data-cursor="hover"
+                >
+                  <span className="text-base">💬</span> Order via WhatsApp
+                </button>
+                <button
+                  onClick={handleCallNow}
+                  className="flex-1 px-6 py-3.5 bg-white/5 hover:bg-white/10 text-white border border-white/10 hover:border-white/20 rounded-xl font-display font-bold text-sm tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-2 min-h-[44px]"
+                  data-cursor="hover"
+                >
+                  <span className="text-base">📞</span> Call Now
+                </button>
+              </div>
             </div>
 
             {/* Wishlist */}

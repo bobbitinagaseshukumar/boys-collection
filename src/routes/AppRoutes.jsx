@@ -12,6 +12,7 @@ const RegisterPage = lazy(() => import('@/pages/RegisterPage'))
 const OTPPage = lazy(() => import('@/pages/OTPPage'))
 const ProfilePage = lazy(() => import('@/pages/ProfilePage'))
 const WishlistPage = lazy(() => import('@/pages/WishlistPage'))
+const AdminDashboardPage = lazy(() => import('@/pages/AdminDashboardPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 
 function PageLoader() {
@@ -39,6 +40,7 @@ export default function AppRoutes() {
         <Route path="/otp" element={<OTPPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/wishlist" element={<WishlistPage />} />
+        <Route path="/admin" element={<AdminDashboardPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Suspense>

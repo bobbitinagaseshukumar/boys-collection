@@ -1,23 +1,142 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useSelector } from 'react-redux'
-import { selectCartTotal, selectCartCount } from '@/redux/slices/cartSlice'
+import { selectCartTotal, selectCartCount, selectCartItems } from '@/redux/slices/cartSlice'
 import { formatPrice } from '@/utils/helpers'
+import { api } from '@/utils/api'
 import GlassCard from '@/components/ui/GlassCard'
 import FloatingLabel from '@/components/ui/FloatingLabel'
 import MagneticButton from '@/components/ui/MagneticButton'
 
 const STEPS = ['Address', 'Shipping', 'Payment', 'Confirmation']
 
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    if (window.Razorpay) {
+      resolve(true)
+      return
+    }
+    const script = document.createElement('script')
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+    script.onload = () => resolve(true)
+    script.onerror = () => resolve(false)
+    document.body.appendChild(script)
+  })
+}
+
 export default function CheckoutPage() {
   const [step, setStep] = useState(0)
   const total = useSelector(selectCartTotal)
   const count = useSelector(selectCartCount)
+  const cartItems = useSelector(selectCartItems)
   const [form, setForm] = useState({ name: '', phone: '', address: '', city: '', state: '', pincode: '', shipping: 'standard', payment: 'upi' })
+  const [loading, setLoading] = useState(false)
+  const [orderNumber, setOrderNumber] = useState('')
 
   useEffect(() => { document.title = 'Checkout | STYLEX' }, [])
 
   const update = (field) => (e) => setForm({ ...form, [field]: e.target.value })
+
+  const handlePlaceOrder = async () => {
+    if (loading) return
+    setLoading(true)
+
+    try {
+      const itemsPayload = cartItems.map(i => ({
+        productId: i.id,
+        size: i.size,
+        color: i.color,
+        quantity: i.quantity
+      }))
+
+      const addressPayload = {
+        name: form.name,
+        phone: form.phone,
+        address: form.address,
+        city: form.city,
+        state: form.state,
+        pincode: form.pincode
+      }
+
+      const res = await api.post('/api/orders', {
+        items: itemsPayload,
+        address: addressPayload,
+        paymentMethod: form.payment
+      })
+
+      if (res.success || res.data) {
+        const orderData = res.data || res
+        setOrderNumber(orderData.orderNumber)
+
+        if (form.payment === 'cod') {
+          setStep(3)
+        } else {
+          // Prepaid order Razorpay payment loop
+          const rzPayload = res.razorpay
+          if (rzPayload) {
+            const hasScriptLoaded = await loadRazorpayScript()
+            if (!hasScriptLoaded) {
+              alert('Failed to load Razorpay payment gateway script. Please check your internet connection.')
+              setLoading(false)
+              return
+            }
+
+            if (rzPayload.isMock) {
+              // Automatically complete payment in mock mode
+              const verifyRes = await api.post('/api/orders/verify-payment', {
+                razorpayOrderId: rzPayload.id,
+                razorpayPaymentId: 'pay_mock_' + Math.random().toString(36).substring(2, 10),
+                orderId: orderData.id
+              })
+              if (verifyRes.success) {
+                setStep(3)
+              } else {
+                alert('Mock payment validation failed.')
+              }
+            } else {
+              // Open real Razorpay modal
+              const options = {
+                key: rzPayload.id, // ID refers to transactionId receipt
+                amount: rzPayload.amount,
+                currency: rzPayload.currency,
+                name: 'Style Inverse @Jeshuvesre',
+                description: 'eCommerce Order Payment',
+                order_id: rzPayload.id,
+                handler: async function (response) {
+                  const verifyRes = await api.post('/api/orders/verify-payment', {
+                    razorpayOrderId: response.razorpay_order_id,
+                    razorpayPaymentId: response.razorpay_payment_id,
+                    razorpaySignature: response.razorpay_signature,
+                    orderId: orderData.id
+                  })
+                  if (verifyRes.success) {
+                    setStep(3)
+                  } else {
+                    alert('Razorpay payment signature validation failed.')
+                  }
+                },
+                prefill: {
+                  name: form.name,
+                  contact: form.phone
+                },
+                theme: {
+                  color: '#d4af37'
+                }
+              }
+              const rzp = new window.Razorpay(options)
+              rzp.open()
+            }
+          }
+        }
+      } else {
+        alert(res.message || 'Order creation failed.')
+      }
+    } catch (err) {
+      alert(err.message || 'An error occurred while placing order.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="page-container">
@@ -108,7 +227,7 @@ export default function CheckoutPage() {
                       <span className="text-6xl mb-4 block">🎉</span>
                     </motion.div>
                     <h2 className="text-[#d4af37] font-display font-bold text-2xl mb-2">Order Confirmed!</h2>
-                    <p className="text-white/40 text-sm mb-2">Order #STX-{Math.floor(Math.random() * 900000 + 100000)}</p>
+                    <p className="text-white/40 text-sm mb-2">Order Number: {orderNumber || '#STX-849204'}</p>
                     <p className="text-white/30 text-xs mb-8">We'll send you tracking details via email</p>
                     <MagneticButton variant="gold" href="/shop">Continue Shopping</MagneticButton>
                   </GlassCard>
@@ -119,11 +238,11 @@ export default function CheckoutPage() {
             {/* Nav buttons */}
             {step < 3 && (
               <div className="flex justify-between mt-6">
-                <MagneticButton variant="glass" onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}>
+                <MagneticButton variant="glass" onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0 || loading}>
                   Back
                 </MagneticButton>
-                <MagneticButton variant="gold" onClick={() => setStep(Math.min(3, step + 1))}>
-                  {step === 2 ? 'Place Order' : 'Continue'}
+                <MagneticButton variant="gold" onClick={step === 2 ? handlePlaceOrder : () => setStep(Math.min(3, step + 1))} disabled={loading}>
+                  {loading ? 'Processing...' : (step === 2 ? 'Place Order' : 'Continue')}
                 </MagneticButton>
               </div>
             )}

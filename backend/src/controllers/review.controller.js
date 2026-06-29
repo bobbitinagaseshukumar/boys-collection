@@ -71,6 +71,38 @@ export const createReview = async (req, res, next) => {
       return next(new ErrorResponse('Product not found.', 404))
     }
 
+    // Verify purchase eligibility
+    const hasOrder = await prisma.order.findFirst({
+      where: {
+        userId,
+        orderItems: {
+          some: { productId }
+        },
+        OR: [
+          { paymentStatus: 'PAID' },
+          { status: { in: ['DELIVERED', 'SHIPPED', 'PROCESSING'] } }
+        ]
+      }
+    })
+
+    let hasWhatsAppOrder = false
+    if (!hasOrder && req.user.phone) {
+      const waOrder = await prisma.whatsAppOrder.findFirst({
+        where: {
+          phoneNumber: req.user.phone,
+          productName: product.title,
+          status: 'Completed'
+        }
+      })
+      if (waOrder) {
+        hasWhatsAppOrder = true
+      }
+    }
+
+    if (!hasOrder && !hasWhatsAppOrder) {
+      return next(new ErrorResponse('Only verified buyers who completed their purchase can review this product.', 403))
+    }
+
     // Check if user already reviewed this product
     const existingReview = await prisma.review.findFirst({
       where: { productId, userId }
