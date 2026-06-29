@@ -771,9 +771,11 @@ function AdminReviewsPanel({ reviews, setReviews }) {
 function AdminInventoryPanel({ products, setProducts }) {
   const handleStockOverride = async (p, val) => {
     try {
-      const res = await api.put(`/api/products/${p.id}`, { ...p, stock: parseInt(val) })
+      const newStock = parseInt(val)
+      if (isNaN(newStock) || newStock === p.stock) return
+      const res = await api.put(`/api/products/${p.id}`, { stock: newStock })
       if (res.success || res.data) {
-        setProducts(prev => prev.map(item => item.id === p.id ? { ...item, stock: parseInt(val) } : item))
+        setProducts(prev => prev.map(item => item.id === p.id ? { ...item, stock: newStock } : item))
       }
     } catch (err) {
       alert(err.message || 'Failed to override stock.')
@@ -829,67 +831,110 @@ function AdminInventoryPanel({ products, setProducts }) {
 /* 9. ANALYTICS CHARTS SUBCOMPONENT */
 function AdminAnalyticsPanel() {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
-  const sales = [45, 58, 62, 78, 95, 120] // in thousands
+  const [analyticsData, setAnalyticsData] = useState(null)
+  const [loadingAnalytics, setLoadingAnalytics] = useState(true)
+
+  useEffect(() => {
+    api.get('/api/admin/analytics')
+      .then(res => {
+        const data = res.data || res
+        setAnalyticsData(data)
+      })
+      .catch(err => console.error('Failed to load analytics:', err))
+      .finally(() => setLoadingAnalytics(false))
+  }, [])
+
+  const sales = analyticsData?.salesData || [0, 0, 0, 0, 0, 0]
+  const customers = analyticsData?.customerGrowth || [0, 0, 0, 0, 0, 0]
+  const maxSales = Math.max(...sales, 1)
+  const maxCustomers = Math.max(...customers, 1)
+
+  if (loadingAnalytics) {
+    return (
+      <div className="min-h-[40vh] flex items-center justify-center">
+        <div className="w-10 h-10 border-2 border-[#d4af37] border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      {/* Sales Analytics Chart (SVG animated) */}
-      <GlassCard>
-        <h3 className="text-white font-display font-bold text-lg mb-6">Sales Growth (₹ in Thousands)</h3>
-        <div className="relative h-60 w-full flex items-end justify-between px-2 pt-6">
-          {/* Vertical axis guides */}
-          <div className="absolute inset-0 flex flex-col justify-between border-l border-white/5 pl-2 text-[10px] text-white/30 select-none">
-            <div>120K</div>
-            <div>80K</div>
-            <div>40K</div>
-            <div>0</div>
-          </div>
-          {/* Chart Columns */}
-          {sales.map((val, idx) => (
-            <div key={idx} className="flex flex-col items-center gap-2 z-10 flex-1">
-              <motion.div
-                initial={{ height: 0 }}
-                animate={{ height: `${(val / 120) * 160}px` }}
-                transition={{ duration: 1, delay: idx * 0.1 }}
-                className="w-8 bg-gradient-to-t from-[#d4af37]/20 to-[#d4af37] rounded-t-lg relative group shadow-[0_0_15px_rgba(212,175,55,0.2)]"
-              >
-                <div className="absolute top-[-25px] left-1/2 translate-x-[-50%] bg-[#0a0a0f] text-[10px] text-[#d4af37] px-1.5 py-0.5 rounded border border-[#d4af37]/30 opacity-0 group-hover:opacity-100 transition-opacity font-bold">
-                  ₹{val}K
+    <div className="space-y-8">
+      {/* Top Products & Category Performance */}
+      {analyticsData?.topProducts?.length > 0 && (
+        <GlassCard>
+          <h3 className="text-white font-display font-bold text-lg mb-6">Top Rated Products</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {analyticsData.topProducts.slice(0, 4).map((p) => (
+              <div key={p.id} className="p-4 rounded-xl border border-white/5 bg-white/[0.02]">
+                <img src={p.images?.[0]?.url || p.images?.[0] || 'https://placehold.co/200'} className="w-full h-32 object-cover rounded-lg mb-3" />
+                <h4 className="text-white text-sm font-semibold line-clamp-1">{p.title}</h4>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-[#d4af37] font-bold text-sm">₹{p.price?.toLocaleString()}</span>
+                  <span className="text-yellow-400 text-xs font-bold">★ {p.avgRating?.toFixed(1) || 'N/A'}</span>
                 </div>
-              </motion.div>
-              <span className="text-xs text-white/40">{months[idx]}</span>
-            </div>
-          ))}
-        </div>
-      </GlassCard>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+      )}
 
-      {/* Customer Growth Chart (SVG animated) */}
-      <GlassCard>
-        <h3 className="text-white font-display font-bold text-lg mb-6">Customer Registrations</h3>
-        <div className="relative h-60 w-full flex items-end justify-between px-2 pt-6">
-          <div className="absolute inset-0 flex flex-col justify-between border-l border-white/5 pl-2 text-[10px] text-white/30 select-none">
-            <div>150</div>
-            <div>100</div>
-            <div>50</div>
-            <div>0</div>
-          </div>
-          {[15, 28, 42, 60, 85, 110].map((val, idx) => (
-            <div key={idx} className="flex flex-col items-center gap-2 z-10 flex-1">
-              <motion.div
-                initial={{ height: 0 }}
-                animate={{ height: `${(val / 150) * 160}px` }}
-                transition={{ duration: 1, delay: idx * 0.1 }}
-                className="w-8 bg-gradient-to-t from-blue-500/20 to-blue-400 rounded-t-lg relative group shadow-[0_0_15px_rgba(59,130,246,0.2)]"
-              >
-                <div className="absolute top-[-25px] left-1/2 translate-x-[-50%] bg-[#0a0a0f] text-[10px] text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/30 opacity-0 group-hover:opacity-100 transition-opacity font-bold">
-                  {val}
-                </div>
-              </motion.div>
-              <span className="text-xs text-white/40">{months[idx]}</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Sales Analytics Chart */}
+        <GlassCard>
+          <h3 className="text-white font-display font-bold text-lg mb-6">Sales Growth (₹ in Thousands)</h3>
+          <div className="relative h-60 w-full flex items-end justify-between px-2 pt-6">
+            <div className="absolute inset-0 flex flex-col justify-between border-l border-white/5 pl-2 text-[10px] text-white/30 select-none">
+              <div>{Math.round(maxSales)}K</div>
+              <div>{Math.round(maxSales * 0.66)}K</div>
+              <div>{Math.round(maxSales * 0.33)}K</div>
+              <div>0</div>
             </div>
-          ))}
-        </div>
-      </GlassCard>
+            {sales.map((val, idx) => (
+              <div key={idx} className="flex flex-col items-center gap-2 z-10 flex-1">
+                <motion.div
+                  initial={{ height: 0 }}
+                  animate={{ height: `${(val / maxSales) * 160}px` }}
+                  transition={{ duration: 1, delay: idx * 0.1 }}
+                  className="w-8 bg-gradient-to-t from-[#d4af37]/20 to-[#d4af37] rounded-t-lg relative group shadow-[0_0_15px_rgba(212,175,55,0.2)]"
+                >
+                  <div className="absolute top-[-25px] left-1/2 translate-x-[-50%] bg-[#0a0a0f] text-[10px] text-[#d4af37] px-1.5 py-0.5 rounded border border-[#d4af37]/30 opacity-0 group-hover:opacity-100 transition-opacity font-bold">
+                    ₹{val}K
+                  </div>
+                </motion.div>
+                <span className="text-xs text-white/40">{months[idx]}</span>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+
+        {/* Customer Growth Chart */}
+        <GlassCard>
+          <h3 className="text-white font-display font-bold text-lg mb-6">Customer Registrations</h3>
+          <div className="relative h-60 w-full flex items-end justify-between px-2 pt-6">
+            <div className="absolute inset-0 flex flex-col justify-between border-l border-white/5 pl-2 text-[10px] text-white/30 select-none">
+              <div>{maxCustomers}</div>
+              <div>{Math.round(maxCustomers * 0.66)}</div>
+              <div>{Math.round(maxCustomers * 0.33)}</div>
+              <div>0</div>
+            </div>
+            {customers.map((val, idx) => (
+              <div key={idx} className="flex flex-col items-center gap-2 z-10 flex-1">
+                <motion.div
+                  initial={{ height: 0 }}
+                  animate={{ height: `${(val / maxCustomers) * 160}px` }}
+                  transition={{ duration: 1, delay: idx * 0.1 }}
+                  className="w-8 bg-gradient-to-t from-blue-500/20 to-blue-400 rounded-t-lg relative group shadow-[0_0_15px_rgba(59,130,246,0.2)]"
+                >
+                  <div className="absolute top-[-25px] left-1/2 translate-x-[-50%] bg-[#0a0a0f] text-[10px] text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/30 opacity-0 group-hover:opacity-100 transition-opacity font-bold">
+                    {val}
+                  </div>
+                </motion.div>
+                <span className="text-xs text-white/40">{months[idx]}</span>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+      </div>
     </div>
   )
 }
@@ -903,7 +948,10 @@ function AdminSettingsPanel() {
     phone: '',
     address: '',
     instagram: '',
-    facebook: ''
+    facebook: '',
+    tagline: '',
+    aboutUs: '',
+    logo: ''
   })
   const [loading, setLoading] = useState(false)
 
@@ -915,7 +963,10 @@ function AdminSettingsPanel() {
         phone: settings.phone || '',
         address: settings.address || '',
         instagram: settings.instagram || '',
-        facebook: settings.facebook || ''
+        facebook: settings.facebook || '',
+        tagline: settings.tagline || '',
+        aboutUs: settings.aboutUs || '',
+        logo: settings.logo || ''
       })
     }
   }, [settings])
@@ -924,6 +975,8 @@ function AdminSettingsPanel() {
     e.preventDefault()
     setLoading(true)
     try {
+      // Only send the fields this panel manages — the backend
+      // now ignores undefined fields so other configs stay safe
       const res = await api.put('/api/settings', formData)
       if (res.success || res.data) {
         updateSettingsLocally(res.data || res)
@@ -937,10 +990,12 @@ function AdminSettingsPanel() {
   }
 
   return (
-    <GlassCard className="max-w-xl">
+    <GlassCard className="max-w-2xl">
       <h3 className="text-white font-display font-bold text-lg mb-6">Store & Contact Settings</h3>
       <form onSubmit={handleSubmit} className="space-y-5">
         <FloatingLabel label="Shop Name" value={formData.shopName} onChange={(e) => setFormData({ ...formData, shopName: e.target.value })} required />
+        <FloatingLabel label="Tagline" value={formData.tagline} onChange={(e) => setFormData({ ...formData, tagline: e.target.value })} />
+        <FloatingLabel label="Logo URL" value={formData.logo} onChange={(e) => setFormData({ ...formData, logo: e.target.value })} />
         <div className="grid grid-cols-2 gap-4">
           <FloatingLabel label="WhatsApp Number" value={formData.whatsapp} onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })} required />
           <FloatingLabel label="Phone Number" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} required />
@@ -949,6 +1004,15 @@ function AdminSettingsPanel() {
         <div className="grid grid-cols-2 gap-4">
           <FloatingLabel label="Instagram URL" value={formData.instagram} onChange={(e) => setFormData({ ...formData, instagram: e.target.value })} />
           <FloatingLabel label="Facebook URL" value={formData.facebook} onChange={(e) => setFormData({ ...formData, facebook: e.target.value })} />
+        </div>
+        <div>
+          <label className="text-[10px] uppercase text-white/40 block mb-1">About Us</label>
+          <textarea
+            value={formData.aboutUs}
+            onChange={(e) => setFormData({ ...formData, aboutUs: e.target.value })}
+            rows="3"
+            className="w-full bg-[#050508] border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none resize-none"
+          />
         </div>
         <MagneticButton variant="gold" size="lg" type="submit" disabled={loading} fullWidth>{loading ? 'Saving...' : 'Save Configurations'}</MagneticButton>
       </form>
@@ -1257,19 +1321,61 @@ function AdminMarketingPanel() {
   )
 }
 
-/* 13. MEDIA CENTER SUBCOMPONENT */
+/* 13. MEDIA CENTER SUBCOMPONENT — Uses real product images from database */
 function AdminMediaLibraryPanel() {
   const [search, setSearch] = useState('')
   const [selectedFolder, setSelectedFolder] = useState('All')
-  const folders = ['All', 'Products', 'Categories', 'Banners', 'Marketing']
-  const mockMedia = [
-    { name: 'silk_saree_hero.jpg', url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=600', folder: 'Products', size: '240 KB' },
-    { name: 'designer_suit_banner.jpg', url: 'https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?q=80&w=600', folder: 'Banners', size: '420 KB' },
-    { name: 'diwali_discount_card.png', url: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=600', folder: 'Marketing', size: '180 KB' },
-    { name: 'category_men_shirts.jpg', url: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=600', folder: 'Categories', size: '120 KB' }
-  ]
+  const [mediaItems, setMediaItems] = useState([])
+  const [loadingMedia, setLoadingMedia] = useState(true)
+  const folders = ['All', 'Products', 'Categories', 'Banners']
 
-  const filtered = mockMedia.filter(item => {
+  useEffect(() => {
+    const loadMedia = async () => {
+      try {
+        const [productsRes, categoriesRes] = await Promise.all([
+          api.get('/api/products'),
+          api.get('/api/categories')
+        ])
+        const products = productsRes.data || productsRes.products || productsRes
+        const categories = categoriesRes.data || categoriesRes.categories || categoriesRes
+
+        const items = []
+        // Extract all product images
+        if (Array.isArray(products)) {
+          products.forEach(p => {
+            const imgs = p.images || []
+            imgs.forEach((img, i) => {
+              const url = img.url || img
+              if (url && typeof url === 'string') {
+                items.push({
+                  name: `${p.title}_${i + 1}`,
+                  url,
+                  folder: 'Products',
+                  productId: p.id
+                })
+              }
+            })
+          })
+        }
+        // Extract all category images
+        if (Array.isArray(categories)) {
+          categories.forEach(c => {
+            if (c.image) {
+              items.push({ name: `cat_${c.name}`, url: c.image, folder: 'Categories' })
+            }
+          })
+        }
+        setMediaItems(items)
+      } catch (err) {
+        console.error('Failed to load media:', err)
+      } finally {
+        setLoadingMedia(false)
+      }
+    }
+    loadMedia()
+  }, [])
+
+  const filtered = mediaItems.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase())
     const matchesFolder = selectedFolder === 'All' || item.folder === selectedFolder
     return matchesSearch && matchesFolder
@@ -1280,7 +1386,7 @@ function AdminMediaLibraryPanel() {
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
         <div>
           <h3 className="text-white font-display font-bold text-lg">Central Media Library</h3>
-          <p className="text-white/40 text-xs mt-0.5">Manage and organize all uploaded catalog photos and campaign banner assets.</p>
+          <p className="text-white/40 text-xs mt-0.5">All images used across your product catalog and category banners.</p>
         </div>
         <div className="flex gap-3 w-full md:w-auto">
           <input
@@ -1290,9 +1396,9 @@ function AdminMediaLibraryPanel() {
             onChange={(e) => setSearch(e.target.value)}
             className="bg-white/[0.04] text-white border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d4af37] w-full md:w-48"
           />
-          <button className="px-4 py-2 bg-white/[0.06] border border-white/10 rounded-lg text-sm hover:bg-white/10 whitespace-nowrap">
-            📤 Upload File
-          </button>
+          <span className="px-4 py-2 bg-white/[0.03] border border-white/5 rounded-lg text-sm text-white/40 whitespace-nowrap">
+            {mediaItems.length} items
+          </span>
         </div>
       </div>
 
@@ -1312,28 +1418,37 @@ function AdminMediaLibraryPanel() {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {filtered.map((item, idx) => (
-          <div key={idx} className="group relative bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden hover:border-white/20 transition-all duration-300">
-            <img src={item.url} alt={item.name} className="w-full h-32 object-cover" />
-            <div className="p-3">
-              <p className="text-xs text-white/80 font-medium truncate mb-0.5">{item.name}</p>
-              <div className="flex justify-between items-center text-[10px] text-white/30">
-                <span>{item.folder}</span>
-                <span>{item.size}</span>
+      {loadingMedia ? (
+        <div className="min-h-[20vh] flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-[#d4af37] border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="min-h-[20vh] flex items-center justify-center">
+          <p className="text-white/20 text-sm">No media found. Add images to your products to see them here.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {filtered.map((item, idx) => (
+            <div key={idx} className="group relative bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden hover:border-white/20 transition-all duration-300">
+              <img src={item.url} alt={item.name} className="w-full h-32 object-cover" loading="lazy" />
+              <div className="p-3">
+                <p className="text-xs text-white/80 font-medium truncate mb-0.5">{item.name}</p>
+                <div className="flex justify-between items-center text-[10px] text-white/30">
+                  <span>{item.folder}</span>
+                </div>
+              </div>
+              <div className="absolute inset-0 bg-[#0a0a0f]/80 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => navigator.clipboard.writeText(item.url).then(() => alert('Image URL copied to clipboard!'))}
+                  className="p-1.5 bg-white/10 hover:bg-white/20 text-xs rounded border border-white/10 text-white"
+                >
+                  🔗 Copy URL
+                </button>
               </div>
             </div>
-            <div className="absolute inset-0 bg-[#0a0a0f]/80 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onClick={() => navigator.clipboard.writeText(item.url).then(() => alert('Image URL copied to clipboard!'))} className="p-1.5 bg-white/10 hover:bg-white/20 text-xs rounded border border-white/10">
-                🔗 Copy URL
-              </button>
-              <button className="p-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs rounded border border-rose-500/30">
-                🗑️ Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </GlassCard>
   )
 }
@@ -1341,13 +1456,21 @@ function AdminMediaLibraryPanel() {
 /* 14. SECURITY LOGS & BACKUPS SUBCOMPONENT */
 function AdminLogsAndBackupsPanel() {
   const [loading, setLoading] = useState(false)
+  const [logs, setLogs] = useState([])
+  const [logsLoading, setLogsLoading] = useState(true)
 
-  const mockLogs = [
-    { user: 'nagaseshukumarbobbiti@gmail.com', action: 'Update settings metadata logo text', time: 'Just now', ip: '103.45.67.92' },
-    { user: 'nagaseshukumarbobbiti@gmail.com', action: 'Change homepage Hero title', time: '10 mins ago', ip: '103.45.67.92' },
-    { user: 'nagaseshukumarbobbiti@gmail.com', action: 'Verify order #1002 payment status', time: '1 hour ago', ip: '103.45.67.92' },
-    { user: 'nagaseshukumarbobbiti@gmail.com', action: 'Delete old product code #9203', time: 'Yesterday', ip: '103.45.67.92' }
-  ]
+  useEffect(() => {
+    api.get('/api/admin/logs')
+      .then(res => {
+        const data = res.data || res
+        setLogs(Array.isArray(data) ? data : [])
+      })
+      .catch(() => {
+        // API may not exist yet; show empty state
+        setLogs([])
+      })
+      .finally(() => setLogsLoading(false))
+  }, [])
 
   const handleExportBackup = async () => {
     try {
@@ -1394,28 +1517,36 @@ function AdminLogsAndBackupsPanel() {
       {/* Activity Logs */}
       <GlassCard className="lg:col-span-2">
         <h3 className="text-white font-display font-bold text-lg mb-6">Admin Activity Logs</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-white/70">
-            <thead>
-              <tr className="border-b border-white/5 text-white/40 text-xs font-semibold uppercase tracking-wider">
-                <th className="pb-3">Admin</th>
-                <th className="pb-3">Action performed</th>
-                <th className="pb-3">Timestamp</th>
-                <th className="pb-3">IP Address</th>
-              </tr>
-            </thead>
-            <tbody>
-              {mockLogs.map((log, idx) => (
-                <tr key={idx} className="border-b border-white/[0.03] hover:bg-white/[0.01]">
-                  <td className="py-3 font-medium text-white/90 text-xs">{log.user}</td>
-                  <td className="py-3 text-xs">{log.action}</td>
-                  <td className="py-3 text-xs text-white/40">{log.time}</td>
-                  <td className="py-3 text-xs text-mono text-white/30">{log.ip}</td>
+        {logsLoading ? (
+          <div className="min-h-[20vh] flex items-center justify-center">
+            <div className="w-8 h-8 border-2 border-[#d4af37] border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : logs.length === 0 ? (
+          <div className="min-h-[20vh] flex items-center justify-center">
+            <p className="text-white/20 text-sm">No activity logs recorded yet. Admin actions will appear here.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-white/70">
+              <thead>
+                <tr className="border-b border-white/5 text-white/40 text-xs font-semibold uppercase tracking-wider">
+                  <th className="pb-3">Admin</th>
+                  <th className="pb-3">Action performed</th>
+                  <th className="pb-3">Timestamp</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {logs.map((log, idx) => (
+                  <tr key={log.id || idx} className="border-b border-white/[0.03] hover:bg-white/[0.01]">
+                    <td className="py-3 font-medium text-white/90 text-xs">{log.user?.email || log.userId || 'Admin'}</td>
+                    <td className="py-3 text-xs">{log.action}</td>
+                    <td className="py-3 text-xs text-white/40">{log.createdAt ? new Date(log.createdAt).toLocaleString() : '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </GlassCard>
 
       {/* Backup controls */}

@@ -63,6 +63,7 @@ model Category {
   slug        String    @unique
   description String?
   image       String?
+  themeColor  String?
   products    Product[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

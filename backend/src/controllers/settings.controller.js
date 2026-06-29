@@ -61,31 +61,32 @@ export const getSettings = async (req, res, next) => {
 // @access  Private/Admin
 export const updateSettings = async (req, res, next) => {
   try {
-    const {
-      shopName, whatsapp, phone, address, instagram, facebook, logo, bannerImages,
-      tagline, aboutUs, missionStatement, storeStory,
-      homepageLayout, popups, announcements, paymentConfig, seoConfig
-    } = req.body
+    // Only include fields that are explicitly present in the request body
+    // This prevents partial saves (e.g. Settings tab) from wiping other configs
+    // (e.g. homepageLayout from Website Builder, popups from Marketing)
+    const allowedFields = [
+      'shopName', 'whatsapp', 'phone', 'address', 'instagram', 'facebook',
+      'logo', 'bannerImages', 'tagline', 'aboutUs', 'missionStatement', 'storeStory',
+      'homepageLayout', 'popups', 'announcements', 'paymentConfig', 'seoConfig'
+    ]
+
+    const updateData = {}
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field]
+      }
+    }
 
     let settings = await prisma.settings.findFirst()
 
     if (!settings) {
       settings = await prisma.settings.create({
-        data: {
-          id: 1,
-          shopName, whatsapp, phone, address, instagram, facebook, logo, bannerImages,
-          tagline, aboutUs, missionStatement, storeStory,
-          homepageLayout, popups, announcements, paymentConfig, seoConfig
-        }
+        data: { id: 1, ...updateData }
       })
     } else {
       settings = await prisma.settings.update({
         where: { id: settings.id },
-        data: {
-          shopName, whatsapp, phone, address, instagram, facebook, logo, bannerImages,
-          tagline, aboutUs, missionStatement, storeStory,
-          homepageLayout, popups, announcements, paymentConfig, seoConfig
-        }
+        data: updateData
       })
     }
 

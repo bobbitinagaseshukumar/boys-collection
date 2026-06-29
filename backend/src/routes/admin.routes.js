@@ -4,7 +4,8 @@ import {
   getAnalyticsData,
   getCustomersAdmin,
   exportBackup,
-  importBackup
+  importBackup,
+  getActivityLogs
 } from '../controllers/admin.controller.js'
 import { protect, authorize } from '../middlewares/auth.js'
 
@@ -18,5 +19,6 @@ router.get('/analytics', getAnalyticsData)
 router.get('/customers', getCustomersAdmin)
 router.get('/backup/export', exportBackup)
 router.post('/backup/import', importBackup)
+router.get('/logs', getActivityLogs)
 
 export default router

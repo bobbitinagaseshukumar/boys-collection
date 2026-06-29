@@ -262,3 +262,27 @@ export const importBackup = async (req, res, next) => {
     next(error)
   }
 }
+
+// @desc    Get admin activity logs
+// @route   GET /api/admin/logs
+// @access  Private/Admin
+export const getActivityLogs = async (req, res, next) => {
+  try {
+    const logs = await prisma.activityLog.findMany({
+      take: 50,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: { name: true, email: true }
+        }
+      }
+    })
+
+    res.status(200).json({
+      success: true,
+      data: logs
+    })
+  } catch (error) {
+    next(error)
+  }
+}
