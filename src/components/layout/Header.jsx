@@ -132,20 +132,20 @@ export default function Header() {
           {isAuthenticated ? (
             <Link
               to="/profile"
-              className="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#d4af37] border border-[#d4af37]/20 rounded-lg transition-all duration-300 hover:bg-[#d4af37]/5"
+              className="hidden md:flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#d4af37] border border-[#d4af37]/20 rounded-lg transition-all duration-300 hover:bg-[#d4af37]/5"
               data-cursor="hover"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              Account
+              <span className="hidden xl:inline">Account</span>
             </Link>
           ) : (
             <Link
               to="/login"
-              className="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-medium text-white/70 hover:text-white border border-white/10 hover:border-white/20 rounded-lg transition-all duration-300 hover:bg-white/5"
+              className="hidden md:flex items-center gap-2 px-3 py-2 text-sm font-medium text-white/70 hover:text-white border border-white/10 hover:border-white/20 rounded-lg transition-all duration-300 hover:bg-white/5"
               data-cursor="hover"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              Login
+              <span className="hidden xl:inline">Login</span>
             </Link>
           )}
 
