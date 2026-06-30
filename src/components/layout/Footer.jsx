@@ -21,6 +21,15 @@ export default function Footer() {
     { to: '/shop?category=jackets', label: 'Jackets' },
   ]
 
+  const footer = settings.footerConfig || {}
+  const description = footer.description || "Redefining luxury men's fashion and traditional wear with curated collections that blend timeless elegance with contemporary style."
+  const copyright = footer.copyright || `© ${new Date().getFullYear()} ${settings.shopName}. All rights reserved.`
+  
+  const socialLinks = footer.socials || [
+    { label: 'Instagram', href: settings.instagram || 'https://instagram.com/style_inverse', path: 'M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 01-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 017.8 2m-.2 2A3.6 3.6 0 004 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 003.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 110 2.5 1.25 1.25 0 010-2.5M12 7a5 5 0 110 10 5 5 0 010-10m0 2a3 3 0 100 6 3 3 0 000-6z' },
+    { label: 'Facebook', href: settings.facebook || 'https://facebook.com/style_inverse', path: 'M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.75z' }
+  ]
+
   return (
     <footer className="relative border-t border-white/[0.06] bg-[#050508]">
       <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-[#0a0a12] to-transparent pointer-events-none" />
@@ -30,18 +39,19 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="md:col-span-2 lg:col-span-1">
             <Link to="/" className="inline-block mb-4">
-              <span className="text-xl font-display font-extrabold tracking-wider text-gradient-gold">
-                {settings.shopName}
-              </span>
+              {footer.logoUrl ? (
+                <img src={footer.logoUrl} alt={settings.shopName} className="h-8 object-contain" />
+              ) : (
+                <span className="text-xl font-display font-extrabold tracking-wider text-gradient-gold">
+                  {settings.shopName}
+                </span>
+              )}
             </Link>
             <p className="text-white/40 text-sm leading-relaxed mb-6 max-w-xs">
-              Redefining luxury men's fashion and traditional wear with curated collections that blend timeless elegance with contemporary style.
+              {description}
             </p>
             <div className="flex items-center gap-3">
-              {[
-                { label: 'Instagram', href: settings.instagram, path: 'M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 01-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 017.8 2m-.2 2A3.6 3.6 0 004 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 003.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 110 2.5 1.25 1.25 0 010-2.5M12 7a5 5 0 110 10 5 5 0 010-10m0 2a3 3 0 100 6 3 3 0 000-6z' },
-                { label: 'Facebook', href: settings.facebook, path: 'M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.75z' }
-              ].map((social) => (
+              {socialLinks.map((social) => (
                 <a
                   key={social.label}
                   href={social.href}
@@ -51,7 +61,7 @@ export default function Footer() {
                   data-cursor="hover"
                   aria-label={social.label}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d={social.path} /></svg>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d={social.path || 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z'} /></svg>
                 </a>
               ))}
             </div>
@@ -116,7 +126,7 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="mt-12 pt-6 border-t border-white/[0.06] flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-white/25 text-xs">© {new Date().getFullYear()} {settings.shopName}. All rights reserved.</p>
+          <p className="text-white/25 text-xs">{copyright}</p>
           <div className="flex items-center gap-6">
             {['Terms', 'Privacy', 'Cookies'].map((link) => (
               <a key={link} href="#" className="text-white/25 hover:text-white/50 text-xs transition-colors" data-cursor="hover">

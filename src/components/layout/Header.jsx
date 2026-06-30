@@ -23,12 +23,16 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const navLinks = [
+  const defaultMenu = [
     { to: '/', label: 'Home' },
     { to: '/shop', label: 'Shop' },
     { to: '/shop?category=shirts', label: 'Categories' },
-    user?.role === 'ADMIN' ? { to: '/admin', label: 'Admin' } : null,
-    { to: '/about', label: 'About' },
+    { to: '/about', label: 'About' }
+  ]
+  const configMenu = settings.headerConfig?.menuItems || defaultMenu
+  const navLinks = [
+    ...configMenu,
+    user?.role === 'ADMIN' ? { to: '/admin', label: 'Admin' } : null
   ].filter(Boolean)
 
   const isHomePage = location.pathname === '/'
@@ -47,10 +51,14 @@ export default function Header() {
     >
       <div className="container-premium flex items-center justify-between h-[70px] md:h-[70px]">
         {/* Logo */}
-        <Link to="/" className="relative z-10" data-cursor="hover">
-          <span className="text-xl md:text-2xl font-display font-extrabold tracking-wider text-gradient-gold">
-            {settings.shopName}
-          </span>
+        <Link to="/" className="relative z-10 flex items-center gap-2" data-cursor="hover">
+          {settings.logo || settings.headerConfig?.logoUrl ? (
+            <img src={settings.logo || settings.headerConfig?.logoUrl} alt={settings.shopName} className="h-8 md:h-10 object-contain" />
+          ) : (
+            <span className="text-xl md:text-2xl font-display font-extrabold tracking-wider text-gradient-gold">
+              {settings.shopName}
+            </span>
+          )}
         </Link>
 
         {/* Desktop Nav */}

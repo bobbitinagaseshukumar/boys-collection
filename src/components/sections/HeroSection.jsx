@@ -1,6 +1,6 @@
-import { Suspense } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { motion } from 'motion/react'
+import { motion, AnimatePresence } from 'motion/react'
 import AnimatedText from '@/components/ui/AnimatedText'
 import MagneticButton from '@/components/ui/MagneticButton'
 import HeroModel from '@/components/three/HeroModel'
@@ -14,24 +14,80 @@ export default function HeroSection() {
   const isMobile = useIsMobile()
   const { settings } = useSettings()
 
-  const hero = settings.seoConfig?.hero || {
+  const defaultSlide = {
     headline: 'REDEFINE YOUR STYLE',
     subheadline: 'Discover the latest premium fashion statements curated for men and traditional wear.',
     bgImage: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=1974',
+    bgVideo: '',
     buttonText: 'Explore Collections',
-    buttonLink: '/shop'
+    buttonLink: '/shop',
+    textColor: '#ffffff',
+    overlayColor: 'rgba(10,10,15,0.7)',
+    animationStyle: 'fadeUp'
   }
+
+  const slides = settings.seoConfig?.heroSlides || [
+    {
+      ...defaultSlide,
+      headline: settings.seoConfig?.hero?.headline || defaultSlide.headline,
+      subheadline: settings.seoConfig?.hero?.subheadline || defaultSlide.subheadline,
+      bgImage: settings.seoConfig?.hero?.bgImage || defaultSlide.bgImage,
+      buttonText: settings.seoConfig?.hero?.buttonText || defaultSlide.buttonText,
+      buttonLink: settings.seoConfig?.hero?.buttonLink || defaultSlide.buttonLink,
+    }
+  ]
+
+  const [currentSlide, setCurrentSlide] = useState(0)
+
+  // Autoplay slides
+  useEffect(() => {
+    if (slides.length <= 1) return
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length)
+    }, 6000)
+    return () => clearInterval(timer)
+  }, [slides.length])
+
+  const s = slides[currentSlide] || defaultSlide
 
   return (
     <section className="relative min-h-screen min-h-[100dvh] flex items-center overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0f] via-[#0f0f1a] to-[#0a0a0f]" />
-      {hero.bgImage && (
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-15 pointer-events-none"
-          style={{ backgroundImage: `url(${hero.bgImage})` }}
-        />
-      )}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentSlide}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
+          className="absolute inset-0"
+        >
+          {/* Background Media */}
+          {s.bgVideo ? (
+            <video
+              src={s.bgVideo}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover opacity-30"
+            />
+          ) : s.bgImage ? (
+            <div
+              className="absolute inset-0 bg-cover bg-center opacity-20"
+              style={{ backgroundImage: `url(${s.bgImage})` }}
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0f] via-[#0f0f1a] to-[#0a0a0f]" />
+          )}
+
+          {/* Overlay Color Override */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ backgroundColor: s.overlayColor || 'rgba(10,10,15,0.7)' }}
+          />
+        </motion.div>
+      </AnimatePresence>
+
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(212,175,55,0.04)_0%,transparent_50%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(59,130,246,0.03)_0%,transparent_50%)]" />
 
@@ -47,44 +103,41 @@ export default function HeroSection() {
             ✦ {settings.shopName} ✦
           </motion.p>
 
-          <AnimatedText
-            animation="fadeUp"
-            delay={0.7}
-            className="text-hero text-white mb-6 leading-tight"
-            tag="h1"
-            triggerOnScroll={false}
-          >
-            {hero.headline}
-          </AnimatedText>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.6 }}
+            >
+              <h1
+                className="text-hero mb-6 leading-tight font-display font-extrabold"
+                style={{ color: s.textColor || '#ffffff' }}
+              >
+                {s.headline}
+              </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.4, duration: 0.6 }}
-            className="text-white/40 text-sm md:text-base max-w-md mx-auto lg:mx-0 mb-8 leading-relaxed font-body"
-          >
-            {hero.subheadline}
-          </motion.p>
+              <p className="text-white/50 text-sm md:text-base max-w-md mx-auto lg:mx-0 mb-8 leading-relaxed font-body">
+                {s.subheadline}
+              </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.7, duration: 0.6 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
-          >
-            <MagneticButton variant="gold" size="lg" href={hero.buttonLink}>
-              {hero.buttonText}
-            </MagneticButton>
-            <MagneticButton variant="outline" size="lg" href="/shop?filter=new">
-              New Arrivals
-            </MagneticButton>
-          </motion.div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <MagneticButton variant="gold" size="lg" href={s.buttonLink}>
+                  {s.buttonText}
+                </MagneticButton>
+                <MagneticButton variant="outline" size="lg" href="/shop?filter=new">
+                  New Arrivals
+                </MagneticButton>
+              </div>
+            </motion.div>
+          </AnimatePresence>
 
           {/* Stats */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 2.1, duration: 0.8 }}
+            transition={{ delay: 1.5, duration: 0.8 }}
             className="flex items-center justify-center lg:justify-start gap-8 mt-12"
           >
             {[
@@ -121,19 +174,34 @@ export default function HeroSection() {
         </motion.div>
       </div>
 
+      {/* Slide dots if multiple slides */}
+      {slides.length > 1 && (
+        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-2.5 z-20">
+          {slides.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentSlide(idx)}
+              className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                currentSlide === idx ? 'bg-[#d4af37] w-6' : 'bg-white/20 hover:bg-white/40'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+
       {/* Scroll indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 2.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        transition={{ delay: 2.0 }}
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5"
       >
-        <span className="text-white/20 text-[10px] uppercase tracking-widest">Scroll</span>
+        <span className="text-white/20 text-[9px] uppercase tracking-widest">Scroll</span>
         <motion.div
-          animate={{ y: [0, 8, 0] }}
+          animate={{ y: [0, 6, 0] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2">
             <polyline points="6 9 12 15 18 9" />
           </svg>
         </motion.div>

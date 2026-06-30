@@ -67,7 +67,8 @@ export const updateSettings = async (req, res, next) => {
     const allowedFields = [
       'shopName', 'whatsapp', 'phone', 'address', 'instagram', 'facebook',
       'logo', 'bannerImages', 'tagline', 'aboutUs', 'missionStatement', 'storeStory',
-      'homepageLayout', 'popups', 'announcements', 'paymentConfig', 'seoConfig'
+      'homepageLayout', 'popups', 'announcements', 'paymentConfig', 'seoConfig',
+      'themeConfig', 'headerConfig', 'footerConfig', 'securityConfig', 'notificationConfig'
     ]
 
     const updateData = {}
